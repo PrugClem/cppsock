@@ -20,6 +20,7 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
 $(ODIR)/%.o: % $(DEPS)
+	mkdir -p obj
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 full:
@@ -31,6 +32,7 @@ test:
 		cppsock_test.cpp $(LIB_OUT)
 
 lib: $(OBJ)
+	mkdir -p out
 	ar -r -s $(LIB_OUT) $(OBJ)
 
 clear:
@@ -41,3 +43,6 @@ clear:
 remake:
 	make clear
 	make full
+
+run:
+	./cppsock_test
