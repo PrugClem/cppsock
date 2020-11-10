@@ -16,7 +16,7 @@ error_t cppsock::tcp_server_setup(cppsock::socket &listener, const char *hostnam
     for(addressinfo &ai : res) // go through every address
     { // if an error occurs, continue jumps here and the loop starts over with the next address
         listener.close(); errno = 0;                                                             // close listener socket and discard the content of errno
-        if(listener.init(ai.get_family(), ai.get_socktype(), ai.get_protocol()) == INVALID_SOCKET) continue; // init listener socket
+        if(listener.init(ai.get_family(), ai.get_socktype(), ai.get_protocol()) == (error_t)INVALID_SOCKET) continue; // init listener socket
         if(listener.bind(ai) == SOCKET_ERROR) continue;                                          // bind address
         if(listener.listen(backlog) == SOCKET_ERROR) continue;                                   // set socket into listening state
         return 0;                                                                                // if this is reached, everything went fine
