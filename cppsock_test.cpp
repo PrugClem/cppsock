@@ -12,6 +12,7 @@ void print_error(const char* msg)
 int main()
 {
     errno = 0;
+    char buf[256];
     cppsock::socket listener, server, client;
     cppsock::tcp_server_setup(listener, nullptr, 10000, 1);
     cppsock::tcp_client_connect(client, nullptr, 10000);
@@ -36,6 +37,8 @@ int main()
     print_error("client.shutdown()\t");
     server.shutdown(SHUT_RDWR);
     print_error("server.shutdown()\t");
+    std::clog << "server.recv():\t\t" << server.recv(buf, sizeof(buf), 0) << std::endl;
+    std::clog << "client.recv():\t\t" << client.recv(buf, sizeof(buf), 0) << std::endl;
     client.close();
     print_error("client.close()\t\t");
     server.close();
