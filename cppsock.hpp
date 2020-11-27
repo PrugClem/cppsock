@@ -1,6 +1,7 @@
 #ifndef CPPSOCK_HPP_INCLUDED
 #define CPPSOCK_HPP_INCLUDED
 
+#include <iostream>
 #include <string.h>
 #include <sstream>
 #include <cerrno>
@@ -94,7 +95,9 @@ namespace cppsock
 
         bool operator==(const socketaddr& other) const;
         bool operator!=(const socketaddr& other) const;
+
     };
+    std::ostream& operator<<(std::ostream &, const cppsock::socketaddr&);
 
     class addressinfo
     {

@@ -189,3 +189,13 @@ bool cppsock::socketaddr::operator!=(const socketaddr& other) const
 {
     return memcmp(&this->sa, &other.sa, sizeof(this->sa)) != 0;
 }
+
+std::ostream& cppsock::operator<<(std::ostream & o, const cppsock::socketaddr& addr)
+{
+    if(addr.get_family() == AF_INET)
+        return o << addr.get_addr() << ":" << addr.get_port();
+    else if(addr.get_family() == AF_INET6)
+        return o << "[" << addr.get_addr() << "]:" << addr.get_port();
+    else
+        return o << "error: unknown address family";
+}
