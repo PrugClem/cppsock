@@ -67,112 +67,427 @@ namespace cppsock
             sockaddr_storage ss;
         } sa;
     public:
-        static bool is(sa_family_t fam, const std::string &);
-        static bool is_ipv4(const std::string&);
-        static bool is_ipv6(const std::string&);
+        /**
+         *  @param fam can be AF_INET or AF_INET6
+         *  @param str string that should be checked
+         *  @return true if the proveided string is a correctly formatted IP address
+         */
+        static bool is(sa_family_t fam, const std::string &str);
+        /**
+         *  @param str string that should be checked
+         *  @return true if the provided string is a correctly formatted IPv4 address
+         */
+        static bool is_ipv4(const std::string &str);
+        /**
+         *  @param str string that should be checked
+         *  @return true if the provided string is a correctly formatted IPv6 address
+         */
+        static bool is_ipv6(const std::string &str);
 
+        /**
+         *  @brief initialises the structure with an empty address
+         */
         socketaddr();
+        /**
+         *  @brief copy constructor
+         */
         socketaddr(const socketaddr& other);
+        /**
+         *  @brief initialises the structure with the provided address and port
+         *  @param addr the IP address the structure should be set to, can be either IPv4 or IPv6
+         *  @param port the port number the structure should be set to, in host byte order
+         */
         socketaddr(const std::string& addr, uint16_t port);
 
+        /**
+         *  @brief copy assignment operator
+         */
         socketaddr& operator=(const socketaddr& other);
 
+        /**
+         *  @brief return a pointer to the raw c-style socketaddr structure
+         */
         sockaddr *data();
+        /**
+         *  @brief return a const pointer to the raw c-style socketaddr structure
+         */
         const sockaddr *data() const;
 
-        void set_family(sa_family_t);
-        error_t set_addr(const std::string&);
-        error_t set_port(uint16_t); /** port in host byte order */
+        /**
+         *  @brief clears the structure and sets the address family
+         *  @param fam AF_INET for IPv4 or AF_INET6 for IPv6
+         */
+        void set_family(sa_family_t fam);
+        /**
+         *  @brief sets the address of the structure
+         *  @param addr the address that should be written into the structure
+         *  @return 0 if everything went right, any other return value indicates an error and errno is set appropriately
+         */
+        error_t set_addr(const std::string& addr);
+        /**
+         *  @brief set the port of the structure
+         *  @param port port number in host byte order
+         *  @return 0 if everything went right, any other return value indicates an error and errno is set appropriately
+         */
+        error_t set_port(uint16_t port);
 
-        error_t set(const std::string&, uint16_t); /** port in host byte order */
-        void    set(sockaddr*);
+        /**
+         *  @brief sets the address and port
+         *  @param addr the address, can be a IPv4 or IPv6 address
+         *  @param port port port number in host byte order
+         *  @return 0 if everything went right, any other return value indicates an error and errno is set appropriately
+         */
+        error_t set(const std::string& addr, uint16_t port);
+        /**
+         *  @brief copies a socket address structure into itself, if the structure is invalid, this structure is cleared
+         *  @param ptr pointer to a socketaddr struture
+         */
+        void    set(const sockaddr* ptr);
 
-        void get_family(sa_family_t&) const;
-        error_t get_addr(std::string&) const;
-        error_t get_port(uint16_t&) const; /** port in host byte order */
+        /**
+         *  @brief gets the address family
+         *  @param out reference to a buffer where the family type should be written into
+         */
+        void get_family(sa_family_t &out) const;
+        /**
+         *  @brief get the address
+         *  @param out reference to a string where the address should be written into
+         *  @return 0 if everything went right, any other return value indicates an error and errno is set appropriately
+         */
+        error_t get_addr(std::string &out) const;
+        /**
+         *  @brief get the port number in host byte order
+         *  @param out reference to a buffer where the port should be written into
+         *  @return 0 if everything went right, any other return value indicates an error and errno is set appropriately
+         */
+        error_t get_port(uint16_t &out) const;
 
+        /**
+         *  @brief gets the address family
+         *  @return the address family
+         */
         sa_family_t get_family() const;
+        /**
+         *  @brief get the address
+         *  @return string containing the address, if an error occured, the string is empty
+         */
         std::string get_addr() const;
-        uint16_t get_port() const; /** port in host byte order */
+        /**
+         *  @brief get the port number in host byte order
+         *  @return the port number in host byte order, if an error occured, 0 is returned
+         */
+        uint16_t get_port() const;
 
-        bool operator==(const socketaddr& other) const;
-        bool operator!=(const socketaddr& other) const;
+        /**
+         *  @return true if this is equal to the other
+         */
+        bool operator==(const socketaddr &other) const;
+        /**
+         *  @return false if this is equal to the other
+         */
+        bool operator!=(const socketaddr &other) const;
+        /**
+         *  @brief operatuor for usage in a std::map, does not have any meaning and does not actually compare the addresses, this just uses memcmp
+         */
+        bool operator<(const socketaddr &other) const;
 
     };
+    /**
+     *  @brief ostream operator for easy output, I will not implement an istream operator
+     */
     std::ostream& operator<<(std::ostream &, const cppsock::socketaddr&);
 
     class addressinfo
     {
         addrinfo _data;
     public:
+        /**
+         *  @brief reutns raw data in c-style sddrinfo structure
+         */
         addrinfo *data();
+        /**
+         *  @brief reutns raw data in c-style sddrinfo structure
+         */
         const addrinfo *data() const;
 
+        /**
+         *  @brief clears this structure
+         *  @return this structure to allow chaining
+         */
         addressinfo &reset();
 
+        /**
+         *  @brief sets the family type for resolving
+         *  @return this structure to allow chaining
+         */
         addressinfo &set_family(sa_family_t);
+        /**
+         *  @brief sets the socket type for this strucutre, can be SOCK_STREAM for TCP or SOCK_DGRAM for UDP
+         *  @return this structure to allow chaining
+         */
         addressinfo &set_socktype(int);
+        /**
+         *  @brief specifies the protocol for this structure, 0 to use socktype defualts
+         *  @return this structure to allow chaining
+         */
         addressinfo &set_protocol(int);
 
+        /**
+         *  @return a socketaddr class
+         */
         socketaddr get_addr() const;
+        /**
+         *  @return address family
+         */
         sa_family_t get_family() const;
+        /**
+         *  @return socket type
+         */
         int get_socktype() const;
+        /**
+         *  @return protocol that should be used
+         */
         int get_protocol() const;
 
+        /**
+         *  cast operator for easy use
+         */
         operator socketaddr() const;
     };
 
+    /**
+     *  @brief resolves a hostname
+     *  @param hostname hostname that should be resolved, nullptr to use loopback
+     *  @param service service name or port number in string format, e.g. "http" or "80" results in port number 80
+     */
     error_t getaddrinfo(const char *hostname, const char* service, const addressinfo *hints, std::vector<addressinfo>& output);
 
     class socket
     {
         socket_t sock{INVALID_SOCKET};
     public:
+        /**
+         *  @brief copying does not make sense
+         */
         socket(const socket &) = delete;
+        /**
+         *  @brief copying does not make sense
+         */
         socket& operator=(const socket&) = delete;
 
+        /**
+         *  @brief initialises an empty, invalid socket
+         */
         socket();
+        /**
+         *  @brief move constructor
+         */
         socket(socket&&);
+        /**
+         *  @brief move assignment operator
+         */
         socket& operator=(socket&&);
+        /**
+         *  @brief swap 2 sockets
+         */
         void swap(socket &);
 
-        error_t init(sa_family_t, int type, int protocol);
+        /**
+         *  @brief initialise a socket and make it valid
+         *  @param fam family to use, AF_INET for IPv4, AF_INET6 for IPv6
+         *  @param type the socket type, e.g. SOCK_STREAM or SOCK_DGRAM
+         *  @param porotcol protocol to use, e.g. IPPROTO_TCP
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
+        error_t init(sa_family_t fam, int type, int protocol);
+        /**
+         *  @brief bind this socket to a given address, a bound socket can be used to accept TCP connections
+         *  @param addr address the socket should be bound to
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
         error_t bind(const socketaddr& addr);
+        /**
+         *  @brief sets a bound socket into listening state to allow tcp connections to be accepted
+         *  @param backlog how many unestablished connections should be logged
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
         error_t listen(int backlog);
-        error_t accept(socket&);
+        /**
+         *  @brief accepts a TCP connection on a listening socket
+         *  @param con the socket the connection should be interacted with
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
+        error_t accept(socket &con);
+        /**
+         *  @brief connects an initialised socket
+         *  @param addr the address the socket should be connecting to
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
         error_t connect(const socketaddr &addr);
         
-        ssize_t send(const void* data, size_t, int flags);
-        ssize_t recv(void* data, size_t, int flags);
+        /**
+         *  @brief sends data over a connected socket
+         *  @param data pointer to the start of the data array
+         *  @param len length of the buffer in bytes
+         *  @param flags changes behavior of the function call, use 0 for default behavioral
+         *  @return if smaller than 0, an error occured and errno is set appropriately, the total amount of bytes sent otherwise
+         */
+        ssize_t send(const void* data, size_t len, int flags);
+        /**
+         *  @brief receives data from a connected socket
+         *  @param data pointer to the start of the buffer where the data should be written into
+         *  @param maxlen amount of bytes available for the buffer in bytes
+         *  @param flags changes behavior of the function call, use 0 for default behavioral
+         *  @return 0 if the connection has been closed, smaller than 0 if an error occured, the amount of bytes received otherwise
+         */
+        ssize_t recv(void* data, size_t maxlen, int flags);
 
-        ssize_t sendto(const void* data, size_t, int flags, const socketaddr*);
-        ssize_t recvfrom(void* data, size_t, int flags, socketaddr*);
+        /**
+         *  @brief sends data over a socket
+         *  @param data pointer to the start of the data array
+         *  @param len length of the buffer in bytes
+         *  @param flags changes behavior of the function call, use 0 for default behavioral
+         *  @param dst pointer to a class where the data should be sent to, use nullptr to use default address
+         *  @return if smaller than 0, an error occured and errno is set appropriately, the total amount of bytes sent otherwise
+         */
+        ssize_t sendto(const void* data, size_t, int flags, const socketaddr *dst);
+        /**
+         *  @brief receives data from a connected socket
+         *  @param data pointer to the start of the buffer where the data should be written into
+         *  @param maxlen amount of bytes available for the buffer in bytes
+         *  @param flags changes behavior of the function call, use 0 for default behavioral
+         *  @param src pointer to a class where the source address should be written into, use nullptr do discard the src address
+         *  @return 0 if the connection has been closed, smaller than 0 if an error occured, the amount of bytes received otherwise
+         */
+        ssize_t recvfrom(void* data, size_t, int flags, socketaddr *src);
 
+        /**
+         *  @return true if the socket is valid (initialised / listening / connected)
+         */
         bool    is_valid() const;
+        /**
+         *  @brief shuts down parts of the socket, THIS CALL IS IRREVERSIBLE!
+         *  @param how how the socket should be shut down, possible options: SHUT_RD / SHUT WR / SHUT_RDWR
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
         error_t shutdown(int how);
+        /**
+         *  @brief closes and invalidates the socket
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
         error_t close();
 
-        error_t getsockname(socketaddr&) const;
-        error_t getpeername(socketaddr&) const;
+        /**
+         *  @brief retrieves the local socket address
+         *  @param addr reference to a buffer where the address should be written into
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
+        error_t getsockname(socketaddr &addr) const;
+        /**
+         *  @brief retrieves the peer socket address
+         *  @param addr reference to a buffer where the address should be written into
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
+        error_t getpeername(socketaddr &addr) const;
 
+        /**
+         *  @brief retrieves the local socket address
+         *  @return address, if an error occured, the result in undefined
+         */
         socketaddr getsockname() const;
+        /**
+         *  @brief retrieves the local socket address
+         *  @return address, if an error occured, the result in undefined
+         */
         socketaddr getpeername() const;
 
+        /**
+         *  @brief sets a socket option
+         *  @param optname socket option name, this can be OS dependant
+         *  @param opt_val pointer to the option value
+         *  @param opt_len length of the option value
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
         error_t setsockopt(int optname, const void* opt_val, socklen_t opt_len);
+        /**
+         *  @brief retrieves a socket option
+         *  @param optname socket option name, this can be OS dependant
+         *  @param opt_val pointer to a buffer where the value should be written into
+         *  @param opt_len length of the buffer provided in opt_val
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
         error_t getsockopt(int optname, void* opt_val, socklen_t *opt_len) const;
 
-        error_t set_keepalive(bool);
-        error_t get_keepalive(bool&) const;
+        /**
+         *  @brief sets the keepalive option
+         *  @param newstate the new value for the keepalive option
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
+        error_t set_keepalive(bool newstate);
+        /**
+         *  @brief get the keepalive option
+         *  @param buf rference to a buffer where the current state should be written into
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
+        error_t get_keepalive(bool &buf) const;
+        /**
+         *  @brief get the keepalive option
+         *  @return current optionstate, if an error occured, the return value is undefined
+         */
         bool    get_keepalive() const;
 
-        error_t set_reuseaddr(bool);
-        error_t get_reuseaddr(bool&) const;
+        /**
+         *  @brief sets the reuseaddr option
+         *  @param newstate the new value for the reuseaddr option
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
+        error_t set_reuseaddr(bool newstate);
+        /**
+         *  @brief get the reuseaddr option
+         *  @param buf rference to a buffer where the current state should be written into
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
+        error_t get_reuseaddr(bool &buf) const;
+        /**
+         *  @brief get the reuseaddr option
+         *  @return current optionstate, if an error occured, the return value is undefined
+         */
         bool    get_reuseaddr() const;
     };
 
+    /**
+     *  @brief sets up a TCP server, binds and sets the listener socket into listening state
+     *  @param listener invalid socket that should be used as the listening socket, will be initialised, bound and set into listening state
+     *  @param hostname the hostname / address the server should listen to, nullptr to let it listen on every IP device
+     *  @param serivce service name / port number in string for the port the server should listen to e.g. "http" or "80" for port 80
+     *  @param backlog how many unestablished connections should be logged
+     *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+     */
     error_t tcp_server_setup(socket &listener, const char *hostname, const char *service, int backlog);
-    error_t tcp_client_connect(socket &listener, const char *hostname, const char *service);
+    /**
+     *  @brief connects a TCP client to a server and connects the provided socket
+     *  @param client invalid socket that should be used to connect to the server
+     *  @param hostname hostname / IP address of the server
+     *  @param service service name / port number in string for the port the client should connect to e.g. "http" or "80" for port 80
+     *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+     */
+    error_t tcp_client_connect(socket &client, const char *hostname, const char *service);
+    /**
+     *  @brief sets up a TCP server, binds and sets the listener socket into listening state
+     *  @param listener invalid socket that should be used as the listening socket, will be initialised, bound and set into listening state
+     *  @param hostname the hostname / address the server should listen to, nullptr to let it listen on every IP device
+     *  @param port port number the server should listen to in host byte order
+     *  @param backlog how many unestablished connections should be logged
+     *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+     */
     error_t tcp_server_setup(socket& listener, const char* hostname, uint16_t port, int backlog);
+    /**
+     *  @brief connects a TCP client to a server and connects the provided socket
+     *  @param client invalid socket that should be used to connect to the server
+     *  @param hostname hostname / IP address of the server
+     *  @param port port number the client should connect to in host byte order
+     *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+     */
     error_t tcp_client_connect(socket& client, const char* hostname, uint16_t port);
 } // namespace cppsock
 

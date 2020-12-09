@@ -64,9 +64,9 @@ error_t socketaddr::set_addr(const std::string &ip)
     }
     else
     {
-        return EAFNOSUPPORT;
+        return errno = EAFNOSUPPORT;
     }
-    if(inet_pton(this->sa.sa_family, ip.data(), addrptr) == 0) return EINVAL;
+    if(inet_pton(this->sa.sa_family, ip.data(), addrptr) == 0) {return errno = EINVAL;}
     return 0;
 }
 
@@ -83,7 +83,7 @@ error_t socketaddr::set_port(uint16_t port)
     }
     else
     {
-        return EAFNOSUPPORT;
+        return errno = EAFNOSUPPORT;
     }
     *portaddr = htons(port);
     return 0;
@@ -97,22 +97,22 @@ error_t socketaddr::set(const std::string& addr, uint16_t port)
     else if( is(AF_INET6, addr) )
         this->set_family(AF_INET6);
     else
-        return EAFNOSUPPORT;
+        return errno = EAFNOSUPPORT;
 
     if( (error = this->set_addr(addr)) != 0 )
-        return error;
+        return error; // errno is already set from set_addr
     if( (error = this->set_port(port)) != 0 )
-        return error;
+        return error; // errno is already set from set_port
 
     return 0;
 }
 
-void socketaddr::set(sockaddr* data)
+void socketaddr::set(const sockaddr* data)
 {
     this->set_family(AF_UNSPEC);
-    if(data->sa_family == AF_INET)
+    if(data->sa_family == AF_INET) // copy IPv4 address structure
         memcpy(&this->sa.sin, data, sizeof(this->sa.sin));
-    else if(data->sa_family == AF_INET6)
+    else if(data->sa_family == AF_INET6) // copy IPv6 address structure
         memcpy(&this->sa.sin6, data, sizeof(this->sa.sin6));
     return;
 }
@@ -136,7 +136,7 @@ error_t socketaddr::get_addr(std::string &buf) const
     }
     else
     {
-        return EAFNOSUPPORT;
+        return errno = EAFNOSUPPORT;
     }
     buf.resize(INET6_ADDRSTRLEN); // preallocate memory for address
     inet_ntop(this->sa.sa_family, (void*)addrptr, &buf[0], INET6_ADDRSTRLEN); // typecast to void* is needed because windows is stupid and needs a non-const pointer
@@ -188,6 +188,11 @@ bool cppsock::socketaddr::operator==(const socketaddr& other) const
 bool cppsock::socketaddr::operator!=(const socketaddr& other) const
 {
     return memcmp(&this->sa, &other.sa, sizeof(this->sa)) != 0;
+}
+
+bool cppsock::socketaddr::operator<(const socketaddr &other) const
+{
+    return memcmp(&this->sa, &other.sa, sizeof(this->sa)) < 0;
 }
 
 std::ostream& cppsock::operator<<(std::ostream & o, const cppsock::socketaddr& addr)
