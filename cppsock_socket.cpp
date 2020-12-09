@@ -62,7 +62,7 @@ error_t socket::accept(socket &other)
     if( __is_error(other.sock) )
     {
         __set_errno_from_WSA();
-        return INVALID_SOCKET;
+        return SOCKET_ERROR;
     }
     return 0;
 }
