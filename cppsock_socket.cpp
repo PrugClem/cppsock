@@ -108,6 +108,25 @@ ssize_t socket::recvfrom(void* buf, size_t size, int flags, socketaddr* src)
     return ret;
 }
 
+error_t socket::available(ssize_t &buf)
+{
+    int error = ioctlsocket(this->sock, FIONREAD, &buf);
+    if( __is_error(error) )
+    {
+        __set_errno_from_WSA();
+        return error;
+    }
+    return 0;
+}
+
+ssize_t socket::available()
+{
+    ssize_t rdy = 0;
+    if( this->available(rdy) != 0 )
+        rdy = 0;
+    return rdy;
+}
+
 bool socket::is_valid() const
 {
     return this->sock != INVALID_SOCKET;

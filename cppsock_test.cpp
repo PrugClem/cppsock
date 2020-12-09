@@ -67,7 +67,9 @@ int main()
     listener.accept(server);
     errno = 0;
     client.send(sendbuf, buflen, 0);
-    perror("send"); errno = 0;
+    perror("send");
+    std::cout << "bytes available: " << server.available() << std::endl;
+    errno = 0;
     server.recv(recvbuf, buflen, 0);
     perror("recv");
     std::cout << "Transfered " << buflen << " bytes of data, " << ((memcmp(sendbuf, recvbuf, buflen) == 0) ? "data is the same" : "data is different") << std::endl;

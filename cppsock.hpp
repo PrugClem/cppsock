@@ -36,17 +36,19 @@ using error_t = int;
 
 #else // _WIN32
 // Linux include files
-#include <netdb.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
 #include <unistd.h>
+#include <netdb.h>
 
 // library definitions
 using socket_t = int;
 constexpr socket_t INVALID_SOCKET = -1;
 constexpr int SOCKET_ERROR = -1;
 inline int closesocket(socket_t s){return close(s);}
+inline int ioctlsocket(socket_t s, long cmd, void *argp) {return ioctl(s, cmd, argp);}
 
 // this is needed because windows is stupid and does not set errno
 // however in linux nothing has to be done
@@ -360,6 +362,18 @@ namespace cppsock
          *  @return 0 if the connection has been closed, smaller than 0 if an error occured, the amount of bytes received otherwise
          */
         ssize_t recvfrom(void* data, size_t, int flags, socketaddr *src);
+
+        /**
+         *  @brief get the amount of bytes ready to read
+         *  @param buf reference to a buffer where the amount should be written into
+         *  @return 0 if everything went right; anything smaller than 0 indicates an error and errno is set appropriately
+         */
+        error_t available(ssize_t &buf);
+        /**
+         *  @brief get the amount of bytes ready to read
+         *  @return the amount of bytes to read; if an error occured, 0 is returned
+         */
+        ssize_t available();
 
         /**
          *  @return true if the socket is valid (initialised / listening / connected)

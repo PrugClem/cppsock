@@ -57,7 +57,7 @@ int cppsock::addressinfo::get_protocol() const
 cppsock::addressinfo::operator socketaddr() const
 {
     socketaddr retbuf;
-    retbuf = this->get_addr();
+    retbuf.set(this->_data.ai_addr);
     return retbuf;
 }
 
