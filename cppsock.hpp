@@ -368,12 +368,12 @@ namespace cppsock
          *  @param buf reference to a buffer where the amount should be written into
          *  @return 0 if everything went right; anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t available(ssize_t &buf);
+        error_t available(size_t &buf);
         /**
          *  @brief get the amount of bytes ready to read
          *  @return the amount of bytes to read; if an error occured, 0 is returned
          */
-        ssize_t available();
+        size_t available();
 
         /**
          *  @return true if the socket is valid (initialised / listening / connected)

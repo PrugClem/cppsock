@@ -20,7 +20,7 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
 $(ODIR)/%.o: % $(DEPS)
-	mkdir obj || true
+	mkdir obj || cd .
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 full:
@@ -32,7 +32,7 @@ test:
 		cppsock_test.cpp $(LIB_OUT)
 
 lib: $(OBJ)
-	mkdir out || true
+	mkdir out || cd .
 	ar -r -s $(LIB_OUT) $(OBJ)
 
 clear:

@@ -108,9 +108,9 @@ ssize_t socket::recvfrom(void* buf, size_t size, int flags, socketaddr* src)
     return ret;
 }
 
-error_t socket::available(ssize_t &buf)
+error_t socket::available(size_t &buf)
 {
-    int error = ioctlsocket(this->sock, FIONREAD, &buf);
+    int error = ioctlsocket(this->sock, FIONREAD, (unsigned long int*)&buf); // typecast because of windows
     if( __is_error(error) )
     {
         __set_errno_from_WSA();
@@ -119,9 +119,9 @@ error_t socket::available(ssize_t &buf)
     return 0;
 }
 
-ssize_t socket::available()
+size_t socket::available()
 {
-    ssize_t rdy = 0;
+    size_t rdy = 0;
     if( this->available(rdy) != 0 )
         rdy = 0;
     return rdy;
