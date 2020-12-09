@@ -32,6 +32,7 @@ using error_t = int;
 
 // this is needed because windows is stupid and does not set errno
 #define __set_errno_from_WSA() {errno = WSAGetLastError();}
+#define __is_error(s) s == SOCKET_ERROR
 
 #else // _WIN32
 // Linux include files
@@ -50,6 +51,7 @@ inline int closesocket(socket_t s){return close(s);}
 // this is needed because windows is stupid and does not set errno
 // however in linux nothing has to be done
 #define __set_errno_from_WSA(){}
+#define __is_error(s) s < 0
 #endif // else _WIN32
 
 namespace cppsock

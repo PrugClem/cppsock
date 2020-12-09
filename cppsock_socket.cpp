@@ -28,7 +28,7 @@ void socket::swap(socket &other)
 error_t socket::init(sa_family_t fam, int type, int protocol)
 {
     this->sock = ::socket(fam, type, protocol);
-    if( this->sock == INVALID_SOCKET)
+    if( __is_error(this->sock) )
     {
         __set_errno_from_WSA();
         return INVALID_SOCKET;
@@ -38,7 +38,7 @@ error_t socket::init(sa_family_t fam, int type, int protocol)
 
 error_t socket::bind(const socketaddr &addr)
 {
-    if( ::bind(this->sock, addr.data(), sizeof(socketaddr)) == SOCKET_ERROR )
+    if( __is_error(::bind(this->sock, addr.data(), sizeof(socketaddr)) ) )
     {
         __set_errno_from_WSA();
         return SOCKET_ERROR;
@@ -48,7 +48,7 @@ error_t socket::bind(const socketaddr &addr)
 
 error_t socket::listen(int backlog)
 {
-    if( ::listen(this->sock, backlog) == SOCKET_ERROR )
+    if( __is_error(::listen(this->sock, backlog) ) )
     {
         __set_errno_from_WSA();
         return SOCKET_ERROR;
@@ -59,7 +59,7 @@ error_t socket::listen(int backlog)
 error_t socket::accept(socket &other)
 {
     other.sock = ::accept(this->sock, nullptr, nullptr);
-    if(other.sock == INVALID_SOCKET)
+    if( __is_error(other.sock) )
     {
         __set_errno_from_WSA();
         return INVALID_SOCKET;
@@ -69,7 +69,7 @@ error_t socket::accept(socket &other)
 
 error_t socket::connect(const socketaddr& addr)
 {
-    if( ::connect(this->sock, addr.data(), sizeof(socketaddr)) == SOCKET_ERROR )
+    if( __is_error(::connect(this->sock, addr.data(), sizeof(socketaddr)) ) )
     {
         __set_errno_from_WSA();
         return SOCKET_ERROR;
@@ -80,14 +80,14 @@ error_t socket::connect(const socketaddr& addr)
 ssize_t socket::send(const void* buf, size_t size, int flags)
 {
     ssize_t ret = ::send(this->sock, (const char*)buf, size, flags); // typecast to const char* is needed because windows
-    if(ret == SOCKET_ERROR) __set_errno_from_WSA();
+    if( __is_error(ret) ) __set_errno_from_WSA();
     return ret;
 }
 
 ssize_t socket::recv(void* buf, size_t size, int flags)
 {
     ssize_t ret = ::recv(this->sock, (char*)buf, size, flags); // typecast to char* is needed because windows
-    if(ret == SOCKET_ERROR) __set_errno_from_WSA();
+    if( __is_error(ret) ) __set_errno_from_WSA();
     return ret;
 }
 
@@ -95,7 +95,7 @@ ssize_t socket::sendto(const void* buf, size_t size, int flags, const socketaddr
 {
     ssize_t ret = (dst == nullptr) ? ::sendto(this->sock, (const char*)buf, size, flags, nullptr, 0) :               // typecast to const char* is needed because windows
                                      ::sendto(this->sock, (const char*)buf, size, flags, dst->data(), sizeof(*dst)); // typecast to const char* is needed because windows
-    if(ret == SOCKET_ERROR) __set_errno_from_WSA();
+    if( __is_error(ret) ) __set_errno_from_WSA();
     return ret;
 }
 
@@ -104,7 +104,7 @@ ssize_t socket::recvfrom(void* buf, size_t size, int flags, socketaddr* src)
     socklen_t socklen = sizeof(*src);
     ssize_t ret = (src == nullptr) ? ::recvfrom(this->sock, (char*)buf, size, flags, nullptr, nullptr) :     // typecast to char* is needed because windows
                                      ::recvfrom(this->sock, (char*)buf, size, flags, src->data(), &socklen); // typecast to char* is needed because windows
-    if(ret == SOCKET_ERROR) __set_errno_from_WSA();
+    if( __is_error(ret) ) __set_errno_from_WSA();
     return ret;
 }
 
@@ -115,7 +115,7 @@ bool socket::is_valid() const
 
 error_t socket::shutdown(int how)
 {
-    if( ::shutdown(this->sock, how) == SOCKET_ERROR )
+    if( __is_error(::shutdown(this->sock, how) ) )
     {
         __set_errno_from_WSA();
         return SOCKET_ERROR;
@@ -125,7 +125,7 @@ error_t socket::shutdown(int how)
 
 error_t socket::close()
 {
-    if( closesocket(this->sock) == SOCKET_ERROR )
+    if( __is_error(closesocket(this->sock) ) )
     {
         __set_errno_from_WSA();
         return SOCKET_ERROR;
@@ -137,7 +137,7 @@ error_t socket::close()
 error_t socket::getsockname(socketaddr& addr) const
 {
     socklen_t socklen = sizeof(addr);
-    if( ::getsockname(this->sock, addr.data(), &socklen) == SOCKET_ERROR )
+    if( __is_error(::getsockname(this->sock, addr.data(), &socklen) ) )
     {
         __set_errno_from_WSA();
         return SOCKET_ERROR;
@@ -148,7 +148,7 @@ error_t socket::getsockname(socketaddr& addr) const
 error_t socket::getpeername(socketaddr &addr) const
 {
     socklen_t socklen = sizeof(addr);
-    if( ::getpeername(this->sock, addr.data(), &socklen) == SOCKET_ERROR )
+    if( __is_error(::getpeername(this->sock, addr.data(), &socklen) ) )
     {
         __set_errno_from_WSA();
         return SOCKET_ERROR;
@@ -172,7 +172,7 @@ socketaddr socket::getpeername() const
 
 error_t socket::setsockopt(int optname, const void *opt_val, socklen_t opt_size)
 {
-    if( ::setsockopt(this->sock, SOL_SOCKET, optname, (const char*)opt_val, opt_size) == SOCKET_ERROR) // typecast to const char* is needed because windows
+    if( __is_error(::setsockopt(this->sock, SOL_SOCKET, optname, (const char*)opt_val, opt_size) ) ) // typecast to const char* is needed because windows
     {
         __set_errno_from_WSA();
         return SOCKET_ERROR;
@@ -182,7 +182,7 @@ error_t socket::setsockopt(int optname, const void *opt_val, socklen_t opt_size)
 
 error_t socket::getsockopt(int optname, void *opt_val, socklen_t *opt_size) const
 {
-    if ( ::getsockopt(this->sock, SOL_SOCKET, optname, (char*)opt_val, opt_size) == SOCKET_ERROR ) // typecast to char* is needed because windows
+    if ( __is_error(::getsockopt(this->sock, SOL_SOCKET, optname, (char*)opt_val, opt_size) ) ) // typecast to char* is needed because windows
     {
         __set_errno_from_WSA();
         return -1;
