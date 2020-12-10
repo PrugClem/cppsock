@@ -7,14 +7,21 @@ socket::socket()
     this->sock = INVALID_SOCKET;
 }
 
+socket::~socket()
+{
+    this->close();
+}
+
 socket::socket(socket&& other)
 {
+    this->close();
     this->sock = other.sock;
     other.sock = INVALID_SOCKET;
 }
 
 cppsock::socket& socket::operator=(socket &&other)
 {
+    this->close();
     this->sock = other.sock;
     other.sock = INVALID_SOCKET;
     return *this;
@@ -248,5 +255,19 @@ bool socket::get_reuseaddr() const
 {
     bool buf;
     this->get_reuseaddr(buf);
+    return buf;
+}
+
+error_t socket::get_socktype(int &socktype) const
+{
+    socklen_t len = sizeof(socktype);
+    error_t ret = this->getsockopt(SO_TYPE, &socktype, &len);
+    return ret;
+}
+
+int socket::get_socktype() const
+{
+    int buf;
+    this->get_socktype(buf);
     return buf;
 }

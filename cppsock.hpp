@@ -282,6 +282,10 @@ namespace cppsock
          */
         socket();
         /**
+         *  @brief dtor to close socket
+         */
+        ~socket();
+        /**
          *  @brief move constructor
          */
         socket(socket&&);
@@ -380,8 +384,9 @@ namespace cppsock
          */
         bool    is_valid() const;
         /**
-         *  @brief shuts down parts of the socket, THIS CALL IS IRREVERSIBLE!
-         *  @param how how the socket should be shut down, possible options: SHUT_RD / SHUT WR / SHUT_RDWR
+         *  @brief shuts down parts of the socket or properly terminates a socket connection, THIS CALL IS IRREVERSIBLE!
+         *  The socket remains valid, no data can be sent or received
+         *  @param how how the socket should be shut down, possible options: SHUT_RD / SHUT_WR / SHUT_RDWR
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
         error_t shutdown(int how);
@@ -467,6 +472,18 @@ namespace cppsock
          *  @return current optionstate, if an error occured, the return value is undefined
          */
         bool    get_reuseaddr() const;
+
+        /**
+         *  @brief get the socket type (SOCK_STREAM, SOCK_DGRAM, e.t.c)
+         *  @param buf reference to a buffer where the socktype should be written into
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
+        error_t get_socktype(int &buf) const;
+        /**
+         *  @brief get the socket type (SOCK_STREAM, SOCK_DGRAM, e.t.c)
+         *  @return socket type, in an error occured, the return value is undefined
+         */
+        int get_socktype() const;
     };
 
     /**

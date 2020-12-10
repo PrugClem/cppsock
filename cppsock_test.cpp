@@ -53,6 +53,8 @@ int main()
     std::cout << "client keepalive: " << (client.get_keepalive() ? "true" : "false") << std::endl;
     client.set_keepalive(true);
     std::cout << "client keepalive: " << (client.get_keepalive() ? "true" : "false") << std::endl;
+    std::cout << "client socktype: " << ( (client.get_socktype() == SOCK_STREAM) ? "SOCK_STREAM" : "NOT SOCK_STREAM" ) << std::endl;
+    std::cout << "listener socktype: " << ( (listener.get_socktype() == SOCK_STREAM) ? "SOCK_STREAM" : "NOT SOCK_STREAM" ) << std::endl;
     listener.close(); server.close(); client.close(); std::cout << std::endl;
 
     std::cout << "Test case 5: sending / recving data" << std::endl;
