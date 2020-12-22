@@ -1,3 +1,8 @@
+/**
+ *  author: Clemens Pruggmayer (PrugClem)
+ *  date:   2020-12-22
+ *  desc:   implementation to load windows' WSA library which is required to use sockets in windows
+ */
 #ifdef _WIN32
 // This is needed becuase windows requires initialisation of a dll to run sockets.
 // Linux uses systemcalls and does not need such a gross sh*t

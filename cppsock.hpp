@@ -1,3 +1,8 @@
+/**
+ *  author: Clemens Pruggmayer (PrugClem)
+ *  date:   2020-12-22
+ *  desc:   main header file for cppsock library, used to define all classes and functions
+ */
 #ifndef CPPSOCK_HPP_INCLUDED
 #define CPPSOCK_HPP_INCLUDED
 

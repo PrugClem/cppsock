@@ -1,3 +1,8 @@
+/**
+ *  author: Clemens Pruggmayer (PrugClem)
+ *  date:   2020-12-22
+ *  desc:   test program to test features for the cppsock library
+ */
 #include "cppsock.hpp"
 #include <iostream>
 #include <thread>

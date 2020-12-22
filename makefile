@@ -1,3 +1,6 @@
+# author:	Clemens Pruggmayer
+# date:		2020-12-22
+# desc:		makefile used to build cppsock library adn test program	
 IDIR =.
 CC=g++
 CFLAGS=-I$(IDIR) -Wall -Wextra
