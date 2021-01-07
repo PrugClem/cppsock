@@ -7,6 +7,25 @@
 
 using namespace cppsock;
 
+error_t cppsock::hostname(std::string &strbuf)
+{
+    char buf[256];
+    if( __is_error( gethostname(buf, sizeof(buf)) ) )
+    {
+        __set_errno_from_WSA();
+        return -1;
+    }
+
+    strbuf = buf;
+    return 0;
+}
+std::string cppsock::hostname()
+{
+    std::string ret;
+    cppsock::hostname(ret);
+    return ret;
+}
+
 error_t cppsock::tcp_server_setup(cppsock::socket &listener, const char *hostname, const char *service, int backlog)
 {
     std::vector<cppsock::addressinfo> res;

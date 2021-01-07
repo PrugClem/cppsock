@@ -13,33 +13,7 @@
 #include <string>
 #include <vector>
 
-#ifdef _WIN32
-// Windows user newer versions
-#undef WINVER
-#define WINVER 0x0A00
-#undef _WIN32_WINNT
-#define _WIN32_WINNT 0xA00
-
-// windows define constants with correct name
-#define SHUT_RDWR SD_BOTH
-#define SHUT_RD SD_RECEIVE
-#define SHUT_WR SD_SEND
-
-// Windows include files
-#include <winsock2.h>
-#include <ws2tcpip.h>
-
-// windows define missing typed
-using sa_family_t = unsigned short;
-using in_port_t = uint16_t;
-using socket_t = SOCKET;
-using error_t = int;
-
-// this is needed because windows is stupid and does not set errno
-#define __set_errno_from_WSA() {errno = WSAGetLastError();}
-#define __is_error(s) s == SOCKET_ERROR
-
-#else // _WIN32
+#if defined __linux__
 // Linux include files
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -58,8 +32,36 @@ inline int ioctlsocket(socket_t s, long cmd, void *argp) {return ioctl(s, cmd, a
 // this is needed because windows is stupid and does not set errno
 // however in linux nothing has to be done
 #define __set_errno_from_WSA(){}
-#define __is_error(s) s < 0
-#endif // else _WIN32
+#define __is_error(s) (s < 0)
+#elif defined _WIN32
+// Windows user newer versions
+#undef WINVER
+#define WINVER 0x0A00
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0xA00
+
+// windows define constants with linux name
+#define SHUT_RDWR SD_BOTH
+#define SHUT_RD SD_RECEIVE
+#define SHUT_WR SD_SEND
+
+// Windows include files
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+// windows define missing types
+using sa_family_t = unsigned short;
+using in_port_t = uint16_t;
+using socket_t = SOCKET;
+using error_t = int;
+
+// this is needed because windows does not set errno
+#define __set_errno_from_WSA() {errno = WSAGetLastError();}
+#define __is_error(s) (s == SOCKET_ERROR)
+#else // elif defined __WIN32__
+// an unsupportet OS was used to compile, Library cannot compile
+#error unsupported OS used
+#endif
 
 namespace cppsock
 {
@@ -491,6 +493,17 @@ namespace cppsock
         int get_socktype() const;
     };
 
+    /**
+     *  @brief gets the machine's hostname
+     *  @param strbuf buffer where the hostname should be written into
+     *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+     */
+    error_t hostname(std::string &strbuf);
+    /**
+     *  @brief gets the machine's hostname
+     *  @return the machine's hostname, if an error occured the return value is undefined
+     */
+    std::string hostname();
     /**
      *  @brief sets up a TCP server, binds and sets the listener socket into listening state
      *  @param listener invalid socket that should be used as the listening socket, will be initialised, bound and set into listening state

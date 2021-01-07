@@ -26,6 +26,8 @@ int main()
     size_t buflen = 256;
     char sendbuf[buflen], recvbuf[buflen];
 
+    std::cout << "This machine's hostname: \"" << cppsock::hostname() << "\"" << std::endl;
+
     std::cout << "Test case 1: Simple TCP connection via loopback, port 10000\n";
     cppsock::tcp_server_setup(listener, nullptr, 10000, 1);
     cppsock::tcp_client_connect(client, nullptr, 10000);
