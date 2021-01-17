@@ -67,6 +67,7 @@ namespace cppsock
 {
     class socketaddr
     {
+    protected:
         union
         {
             sa_family_t sa_family;
@@ -208,6 +209,7 @@ namespace cppsock
 
     class addressinfo
     {
+    protected:
         addrinfo _data;
     public:
         /**
@@ -273,6 +275,7 @@ namespace cppsock
 
     class socket
     {
+    protected:
         socket_t sock{INVALID_SOCKET};
     public:
         /**
@@ -391,17 +394,37 @@ namespace cppsock
          */
         bool    is_valid() const;
         /**
+         *  @brief enum to hold values to shut down a socket connection
+         */
+        enum shutdown_mode : int
+        {
+            shutdown_send = SHUT_WR,
+            shutdown_recv = SHUT_RD,
+            shutdown_both = SHUT_RDWR
+        };
+        /**
          *  @brief shuts down parts of the socket or properly terminates a socket connection, THIS CALL IS IRREVERSIBLE!
+         *  The socket remains valid, no data can be sent or received
+         *  @param how how the socket should be shut down, possible options are listed in the enum cppsock::socket::shutdown_mode
+         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+         */
+        error_t shutdown(socket::shutdown_mode how);
+        /**
+         *  @brief [[deprecated]] shuts down parts of the socket or properly terminates a socket connection, THIS CALL IS IRREVERSIBLE!
          *  The socket remains valid, no data can be sent or received
          *  @param how how the socket should be shut down, possible options: SHUT_RD / SHUT_WR / SHUT_RDWR
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t shutdown(int how);
+        [[deprecated]] error_t shutdown(int how);
         /**
          *  @brief closes and invalidates the socket
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
         error_t close();
+        /**
+         *  @brief get the implementation-dependent socket descriptor
+         */
+        socket_t handle();
 
         /**
          *  @brief retrieves the local socket address

@@ -146,7 +146,17 @@ bool socket::is_valid() const
 
 error_t socket::shutdown(int how)
 {
-    if( __is_error(::shutdown(this->sock, how) ) )
+    if( __is_error(::shutdown(this->sock, how)) )
+    {
+        __set_errno_from_WSA();
+        return SOCKET_ERROR;
+    }
+    return 0;
+}
+
+error_t socket::shutdown(socket::shutdown_mode how)
+{
+    if( __is_error(::shutdown(this->sock, how)) )
     {
         __set_errno_from_WSA();
         return SOCKET_ERROR;
@@ -156,13 +166,18 @@ error_t socket::shutdown(int how)
 
 error_t socket::close()
 {
-    if( __is_error(closesocket(this->sock) ) )
+    if( __is_error(closesocket(this->sock)) )
     {
         __set_errno_from_WSA();
         return SOCKET_ERROR;
     }
     this->sock = INVALID_SOCKET;
     return 0;
+}
+
+socket_t socket::handle()
+{
+    return this->sock;
 }
 
 error_t socket::getsockname(socketaddr& addr) const
