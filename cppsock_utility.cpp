@@ -90,3 +90,20 @@ error_t cppsock::tcp_client_connect(cppsock::socket& client, const char* hostnam
     ss << port;
     return tcp_client_connect(client, hostname, ss.str().c_str());
 }
+
+template<> uint16_t cppsock::hton<uint16_t>(uint16_t p)
+{
+    return htons(p);
+}
+template<> uint32_t cppsock::hton<uint32_t>(uint32_t p)
+{
+    return htonl(p);
+}
+template<> uint16_t cppsock::ntoh<uint16_t>(uint16_t p)
+{
+    return ntohs(p);
+}
+template<> uint32_t cppsock::ntoh<uint32_t>(uint32_t p)
+{
+    return ntohl(p);
+}

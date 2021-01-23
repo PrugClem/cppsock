@@ -90,7 +90,7 @@ error_t socketaddr::set_port(uint16_t port)
     {
         return errno = EAFNOSUPPORT;
     }
-    *portaddr = htons(port);
+    *portaddr = cppsock::hton<uint16_t>(port);
     return 0;
 }
 
@@ -153,11 +153,11 @@ error_t socketaddr::get_port(uint16_t &port) const
 {
     if(this->sa.sa_family == AF_INET)
     {
-        port = ntohs(this->sa.sin.sin_port);
+        port = cppsock::ntoh<uint16_t>(this->sa.sin.sin_port);
     }
     else if(this->sa.sa_family == AF_INET6)
     {
-        port = ntohs(this->sa.sin6.sin6_port);
+        port = cppsock::ntoh<uint16_t>(this->sa.sin6.sin6_port);
     }
     else
     {

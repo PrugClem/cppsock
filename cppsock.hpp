@@ -561,6 +561,51 @@ namespace cppsock
      *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
      */
     error_t tcp_client_connect(socket& client, const char* hostname, uint16_t port);
+
+    /**
+     *  @brief converts a number from host byte order to network byte order.
+     */
+    template<typename T> T hton(T par)
+    {
+        static_assert(std::is_integral<T>::value, "Does not work on noninteger parameters");
+        T res = 0;
+        uint8_t *poin = (uint8_t*)&res;
+        for(ssize_t b=sizeof(T)-1; b>=0; b--)
+        {
+            *poin++ = ( (par & ((T)0xff << (8*b)) ) >> (8*b) );
+        }
+        return res;
+    }
+    /**
+     *  @brief converts a number from network byte order to host byte order.
+     */
+    template<typename T> T ntoh(T par)
+    {
+        static_assert(std::is_integral<T>::value, "Does not work on noninteger parameters");
+        T res = 0;
+        uint8_t *poin = (uint8_t*)&par;
+        for(ssize_t b=sizeof(T)-1; b>=0; b--)
+        {
+            res |= ( (T)*poin++ << (8*b) );
+        }
+        return res;
+    }
+    /**
+     *  @brief converts a 2-byte number from host byte order to network byte order
+     */
+    template<> uint16_t hton<uint16_t>(uint16_t);
+    /**
+     *  @brief converts a 4-byte number from host byte order to network byte order
+     */
+    template<> uint32_t hton<uint32_t>(uint32_t);
+    /**
+     *  @brief converts a 2-byte number from host byte order to network byte order
+     */
+    template<> uint16_t ntoh<uint16_t>(uint16_t);
+    /**
+     *  @brief converts a 4-byte number from host byte order to network byte order
+     */
+    template<> uint32_t ntoh<uint32_t>(uint32_t);
 } // namespace cppsock
 
 #endif // CPPSOCK_HPP_INCLUDED

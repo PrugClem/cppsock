@@ -24,9 +24,15 @@ int main()
 {
     cppsock::socket listener, server, client;
     size_t buflen = 256;
+    uint64_t byte_test = 0x4142434445464748;
     char sendbuf[buflen], recvbuf[buflen];
 
     std::cout << "This machine's hostname: \"" << cppsock::hostname() << "\"" << std::endl;
+
+    std::cout << "byte_test: " << std::hex << byte_test << std::endl;
+    std::cout << "cppsock::hton<uint64_t>(byte_test): " << cppsock::hton<uint64_t>(byte_test) << std::endl;
+    std::cout << "cppsock::ntoh<uint64_t>(cppsock::hton<uint64_t>(byte_test)): " << cppsock::ntoh<uint64_t>(cppsock::hton<uint64_t>(byte_test)) << std::endl;
+    std::cout << std::dec << std::endl;
 
     std::cout << "Test case 1: Simple TCP connection via loopback, port 10000\n";
     cppsock::tcp_server_setup(listener, nullptr, 10000, 1);
