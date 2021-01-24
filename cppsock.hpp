@@ -564,28 +564,42 @@ namespace cppsock
 
     /**
      *  @brief converts a number from host byte order to network byte order.
+     *  You should only use this function is absolutley necessary since thin function does not convert using library functions
      */
     template<typename T> T hton(T par)
     {
-        static_assert(std::is_integral<T>::value, "Does not work on noninteger parameters");
+        static_assert(std::is_integral<T>::value && std::is_unsigned<T>::value, 
+                        "Only works with unsigned integers");
         T res = 0;
         uint8_t *poin = (uint8_t*)&res;
-        for(ssize_t b=sizeof(T)-1; b>=0; b--)
+        for(ssize_t b=sizeof(T)-1; b>=0; b--) // iterate from MSB to LSB
         {
+            // extract from MSB to LSB and write them into first to last byte
+            // (T)0xff          ensure that the extraction mask is always of the parameter type
+            // [...] << (8*b)   moves extraction mask from LSB to appropiate byte
+            // par & [...]      extracts the appropiate byte from the input
+            // [...] >> (8*b)   moves extracted byte into LSB
+            // *poin++ = [...]  Stores each byte in the current memory address, then increments by one for the next byte
             *poin++ = ( (par & ((T)0xff << (8*b)) ) >> (8*b) );
         }
         return res;
     }
     /**
      *  @brief converts a number from network byte order to host byte order.
+     *  You should only use this function is absolutley necessary since thin function does not convert using library functions
      */
     template<typename T> T ntoh(T par)
     {
-        static_assert(std::is_integral<T>::value, "Does not work on noninteger parameters");
+        static_assert(std::is_integral<T>::value && std::is_unsigned<T>::value, 
+                        "Only works with unsigned integers");
         T res = 0;
         uint8_t *poin = (uint8_t*)&par;
-        for(ssize_t b=sizeof(T)-1; b>=0; b--)
+        for(ssize_t b=sizeof(T)-1; b>=0; b--) // iterate from MSB to LSB
         {
+            // extract from first to last byte and write them into MSB to LSB
+            // (T)*poin++       extracts bytes from first to last address as LSB
+            // [...] << (8*b)   moves extracted byte from LSB into appripiate byte
+            // res |= [...]     write extracted byte into result
             res |= ( (T)*poin++ << (8*b) );
         }
         return res;
@@ -599,11 +613,11 @@ namespace cppsock
      */
     template<> uint32_t hton<uint32_t>(uint32_t);
     /**
-     *  @brief converts a 2-byte number from host byte order to network byte order
+     *  @brief converts a 2-byte number from network byte order to host byte order
      */
     template<> uint16_t ntoh<uint16_t>(uint16_t);
     /**
-     *  @brief converts a 4-byte number from host byte order to network byte order
+     *  @brief converts a 4-byte number from network byte order to host byte order
      */
     template<> uint32_t ntoh<uint32_t>(uint32_t);
 } // namespace cppsock
