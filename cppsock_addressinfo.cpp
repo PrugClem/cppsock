@@ -72,7 +72,10 @@ error_t cppsock::getaddrinfo(const char *hostname, const char* service, const cp
     addrinfo *res;
     error_t error = ::getaddrinfo(hostname, service, (hints == nullptr) ? nullptr: hints->data(), &res);
     if(error != 0)
+    {
+        __set_errno_from_WSA();
         return error;
+    }
 
     while(res)
     {
