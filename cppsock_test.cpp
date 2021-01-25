@@ -50,12 +50,12 @@ int main()
     std::cout << std::dec << std::endl;
 
     errno = 0; // reset errno
-    std::cout << "Test case 1: Simple TCP connection via loopback, port 10000\n";
+    std::cout << "Test case 1: Simple TCP connection via loopback, port 10001\n";
     cppsock::tcp_server_setup(listener, nullptr, 10001, 1);                         check_errno("Error setting up TCP server");
     cppsock::tcp_client_connect(client, nullptr, 10001);                            check_errno("Error connecting to TCP server");
     listener.accept(server);                                                        check_errno("Error accepting TCP connection");
     print_details(server, "server-side connection socket");                         check_errno("Error printing server-side connection details");
-    print_details(client, "client-side connsction socket");                         check_errno("Error printing client-side connection details");
+    print_details(client, "client-side connection socket");                         check_errno("Error printing client-side connection details");
     listener.close(); server.close(); client.close(); std::cout << std::endl;       check_errno("Error closing sockets");
 
     std::cout << "Test case 2: Socket options" << std::endl;
