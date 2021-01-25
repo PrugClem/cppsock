@@ -39,10 +39,21 @@ cppsock::addressinfo &cppsock::addressinfo::set_protocol(int proto)
     return *this;
 }
 
+cppsock::addressinfo &cppsock::addressinfo::set_passive(bool passive)
+{
+    if(passive)
+        this->_data.ai_flags |= AI_PASSIVE; // set passive flag
+    else
+        this->_data.ai_flags &= ~AI_PASSIVE; // reset passive flag
+    return *this;
+}
+
+
 cppsock::socketaddr cppsock::addressinfo::get_addr() const
 {
     return cppsock::socketaddr(*this);
 }
+
 
 sa_family_t cppsock::addressinfo::get_family() const
 {

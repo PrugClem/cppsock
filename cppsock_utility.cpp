@@ -32,11 +32,16 @@ error_t cppsock::tcp_server_setup(cppsock::socket &listener, const char *hostnam
     addressinfo hints;
     error_t errno_old = errno; // save old errno number to rewrite it in the case of success
 
-    hints.reset().set_socktype(SOCK_STREAM).set_protocol(IPPROTO_TCP).data()->ai_flags |= AI_PASSIVE; // set hints to TCP for bind()-ing
+    hints.reset().set_socktype(SOCK_STREAM).set_protocol(IPPROTO_TCP).set_passive(true); // set hints to TCP for bind()-ing
     if(cppsock::getaddrinfo(hostname, service, &hints, res) != 0)   // get addresses to bind
     {
         // getaddressinfo failed
         return -2;
+    }
+    if(res.size() == 0)
+    {
+        // no results given
+        return -3;
     }
     for(addressinfo &ai : res) // go through every address
     { // if an error occurs, continue jumps here and the loop starts over with the next address
@@ -61,6 +66,11 @@ error_t cppsock::tcp_client_connect(cppsock::socket &client, const char *hostnam
     {
         // getaddressinfo failed
         return -2;
+    }
+    if(res.size() == 0)
+    {
+        // no results given
+        return -3;
     }
     for(addressinfo &addr : res) // go through every address
     {

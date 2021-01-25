@@ -242,6 +242,11 @@ namespace cppsock
          *  @return this structure to allow chaining
          */
         addressinfo &set_protocol(int);
+        /**
+         *  @brief sets the passive flag, if the passive flag is true, the results can be used for bind()-ing, if the passive flag is false, the address can be used for connect()-ing
+         *  @return this structure to allow chaining
+         */
+        addressinfo &set_passive(bool);
 
         /**
          *  @return a socketaddr class
@@ -270,7 +275,7 @@ namespace cppsock
      *  @brief resolves a hostname
      *  @param hostname hostname that should be resolved, nullptr to use loopback
      *  @param service service name or port number in string format, e.g. "http" or "80" results in port number 80
-     *  @return 0 if everything went right, anything else indicates an error that can pe printed with strerror()
+     *  @return 0 if everything went right, anything else indicates an error that can pe printed with gai_strerror()
      */
     error_t getaddrinfo(const char *hostname, const char* service, const addressinfo *hints, std::vector<addressinfo>& output);
 
