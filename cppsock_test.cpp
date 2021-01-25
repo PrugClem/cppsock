@@ -50,16 +50,16 @@ int main()
     std::cout << std::dec << std::endl;
 
     std::cout << "Test case 1: Simple TCP connection via loopback, port 10000\n";
-    cppsock::tcp_server_setup(listener, nullptr, 10000, 1);                         check_errno("Error setting up TCP server");
-    cppsock::tcp_client_connect(client, nullptr, 10000);                            check_errno("Error connecting to TCP server");
+    cppsock::tcp_server_setup(listener, nullptr, 10001, 1);                         check_errno("Error setting up TCP server");
+    cppsock::tcp_client_connect(client, nullptr, 10001);                            check_errno("Error connecting to TCP server");
     listener.accept(server);                                                        check_errno("Error accepting TCP connection");
     print_details(server, "server-side connection socket");                         check_errno("Error printing server-side connection details");
     print_details(client, "client-side connsction socket");                         check_errno("Error printing client-side connection details");
     listener.close(); server.close(); client.close(); std::cout << std::endl;       check_errno("Error closing sockets");
 
     std::cout << "Test case 2: Socket options" << std::endl;
-    cppsock::tcp_server_setup(listener, nullptr, 10000, 1);                                                                                 check_errno("Error setting up TCP server");
-    cppsock::tcp_client_connect(client, nullptr, 10000);                                                                                    check_errno("Error connecting to TCP server");
+    cppsock::tcp_server_setup(listener, nullptr, 10002, 1);                                                                                 check_errno("Error setting up TCP server");
+    cppsock::tcp_client_connect(client, nullptr, 10002);                                                                                    check_errno("Error connecting to TCP server");
     listener.accept(server);                                                                                                                check_errno("Error accepting TCP connection");
     client.set_keepalive(false);                                                                                                            check_errno("Error while setting client keepalive");
     std::cout << "client keepalive: " << (client.get_keepalive() ? "true" : "false") << std::endl;                                          check_errno("Error while getting client keepalive");
@@ -77,8 +77,8 @@ int main()
         sendbuf[i] = i & 0xFF;
         recvbuf[i] = 0;
     }
-    cppsock::tcp_server_setup(listener, nullptr, 10000, 1);                     check_errno("Error setting up TCP server");
-    cppsock::tcp_client_connect(client, nullptr, 10000);                        check_errno("Error connecting to TCP server");
+    cppsock::tcp_server_setup(listener, nullptr, 10003, 1);                     check_errno("Error setting up TCP server");
+    cppsock::tcp_client_connect(client, nullptr, 10003);                        check_errno("Error connecting to TCP server");
     listener.accept(server);                                                    check_errno("Error accepting TCP connection");
     client.send(sendbuf, buflen, 0);                                            check_errno("Error sending data");
     std::cout << "bytes available: " << server.available() << std::endl;        check_errno("Error getting available bytes");
