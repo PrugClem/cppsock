@@ -270,6 +270,7 @@ namespace cppsock
      *  @brief resolves a hostname
      *  @param hostname hostname that should be resolved, nullptr to use loopback
      *  @param service service name or port number in string format, e.g. "http" or "80" results in port number 80
+     *  @return 0 if everything went right, anything else indicates an error that can pe printed with strerror()
      */
     error_t getaddrinfo(const char *hostname, const char* service, const addressinfo *hints, std::vector<addressinfo>& output);
 

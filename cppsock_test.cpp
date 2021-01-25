@@ -37,6 +37,8 @@ int main()
     const size_t buflen = 256;
     uint64_t byte_test = 0x4142434445464748;
     char sendbuf[buflen], recvbuf[buflen];
+    std::vector<cppsock::addressinfo> ainfo;
+    cppsock::addressinfo hints;
 
     std::cout << "This machine's hostname: \"" << cppsock::hostname() << "\"" << std::endl;
 
@@ -49,10 +51,19 @@ int main()
     }
     std::cout << std::dec << std::endl;
 
-    errno = 0; // reset errno
-    std::cout << "Test case 1: Simple TCP connection via loopback, port 10001\n";
-    cppsock::tcp_server_setup(listener, nullptr, 10001, 1);                         check_errno("Error setting up TCP server");
-    cppsock::tcp_client_connect(client, nullptr, 10001);                            check_errno("Error connecting to TCP server");
+    errno = 0;
+    std::cout << "Test case 1: resolving loopback addresses" << std::endl;
+    std::cout << "resolving: " << strerror(cppsock::getaddrinfo(nullptr, "10000", &hints, ainfo)) << std::endl;
+    std::cout << "total " << ainfo.size() << " results:" << std::endl;
+    for(cppsock::addressinfo &a : ainfo)
+    {
+        std::cout << "result: " << a << std::endl;
+    } std::cout << std::endl;
+    check_errno("Error resolving");
+
+    std::cout << "Test case 1: Simple TCP connection via loopback, port 10001" << std::endl;
+    cppsock::tcp_server_setup(listener, nullptr, 10001, 1);                     check_errno("Error setting up TCP server");
+    cppsock::tcp_client_connect(client, nullptr, 10001);                        check_errno("Error connecting to TCP server");
     listener.accept(server);                                                        check_errno("Error accepting TCP connection");
     print_details(server, "server-side connection socket");                         check_errno("Error printing server-side connection details");
     print_details(client, "client-side connection socket");                         check_errno("Error printing client-side connection details");
