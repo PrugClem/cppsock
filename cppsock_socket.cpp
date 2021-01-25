@@ -122,7 +122,7 @@ ssize_t socket::recvfrom(void* buf, size_t size, int flags, socketaddr* src)
 
 error_t socket::available(size_t &buf)
 {
-    int error = ioctlsocket(this->sock, FIONREAD, (unsigned int*)&buf); // typecast because of windows
+    int error = ioctlsocket(this->sock, FIONREAD, (unsigned long*)&buf); // typecast because of windows
     if( __is_error(error) )
     {
         __set_errno_from_WSA();
