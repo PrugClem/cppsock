@@ -49,3 +49,6 @@ remake:
 
 run:
 	./cppsock_test
+
+check:
+	./cppsock_test 2>&1

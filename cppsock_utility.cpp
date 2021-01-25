@@ -30,6 +30,7 @@ error_t cppsock::tcp_server_setup(cppsock::socket &listener, const char *hostnam
 {
     std::vector<cppsock::addressinfo> res;
     addressinfo hints;
+    error_t errno_old = errno; // save old errno number to rewrite it in the case of success
 
     hints.reset().set_socktype(SOCK_STREAM).set_protocol(IPPROTO_TCP).data()->ai_flags |= AI_PASSIVE; // set hints to TCP for bind()-ing
     if(cppsock::getaddrinfo(hostname, service, &hints, res) != 0)   // get addresses to bind
@@ -39,11 +40,12 @@ error_t cppsock::tcp_server_setup(cppsock::socket &listener, const char *hostnam
     }
     for(addressinfo &ai : res) // go through every address
     { // if an error occurs, continue jumps here and the loop starts over with the next address
-        listener.close(); errno = 0;                                                             // close listener socket and discard the content of errno
+        listener.close();                                                             // close listener socket and discard the content of errno
         if(listener.init(ai.get_family(), ai.get_socktype(), ai.get_protocol()) == (error_t)INVALID_SOCKET) continue; // init listener socket
-        if(listener.bind(ai) == SOCKET_ERROR) continue;                                          // bind address
-        if(listener.listen(backlog) == SOCKET_ERROR) continue;                                   // set socket into listening state
-        return 0;                                                                                // if this is reached, everything went fine
+        if(listener.bind(ai) == SOCKET_ERROR) continue; // bind address
+        if(listener.listen(backlog) == SOCKET_ERROR) continue;  // set socket into listening state
+        errno = errno_old; // If everything went fine, restore errno to previous vale
+        return 0; // if this is reached, everything went fine
     }
     return -1; // if this is reached, no address coule be used to bind
 }
@@ -52,6 +54,7 @@ error_t cppsock::tcp_client_connect(cppsock::socket &client, const char *hostnam
 {
     std::vector<cppsock::addressinfo> res;
     addressinfo hints;
+    error_t errno_old = errno; // save old errno number to rewrite it in the case of success
 
     hints.reset().set_socktype(SOCK_STREAM).set_protocol(IPPROTO_TCP); // set hints to TCP for connect()-ing
     if(cppsock::getaddrinfo(hostname, service, &hints, res) != 0) // get addresses to connect
@@ -68,6 +71,7 @@ error_t cppsock::tcp_client_connect(cppsock::socket &client, const char *hostnam
         }
         else
         {   
+            errno = errno_old; // If everything went fine, restore errno to previous vale
             return 0; // connect was successful, return immideatly
         }
     }

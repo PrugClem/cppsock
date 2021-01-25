@@ -238,7 +238,8 @@ error_t socket::getsockopt(int optname, void *opt_val, socklen_t *opt_size) cons
 
 error_t socket::set_keepalive(bool keepalive)
 {
-    return this->setsockopt(SO_KEEPALIVE, (keepalive) ? "1" : "\0", 1);
+    int val = (keepalive) ? 1 : 0;
+    return this->setsockopt(SO_KEEPALIVE, &val, sizeof(val));
 }
 
 error_t socket::get_keepalive(bool &keepalive) const
