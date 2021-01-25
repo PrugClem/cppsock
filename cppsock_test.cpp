@@ -34,7 +34,7 @@ void print_details(const cppsock::socket &s, const std::string& id)
 int main()
 {
     cppsock::socket listener, server, client;
-    size_t buflen = 256;
+    const size_t buflen = 256;
     uint64_t byte_test = 0x4142434445464748;
     char sendbuf[buflen], recvbuf[buflen];
 
@@ -49,6 +49,7 @@ int main()
     }
     std::cout << std::dec << std::endl;
 
+    errno = 0; // reset errno
     std::cout << "Test case 1: Simple TCP connection via loopback, port 10000\n";
     cppsock::tcp_server_setup(listener, nullptr, 10001, 1);                         check_errno("Error setting up TCP server");
     cppsock::tcp_client_connect(client, nullptr, 10001);                            check_errno("Error connecting to TCP server");
@@ -71,7 +72,6 @@ int main()
    check_errno("Error while setting socket options");
 
     std::cout << "Test case 3: sending / recving data" << std::endl;
-    //memset(sendbuf, 0xff, buflen);
     for(size_t i=0; i<buflen; i++)
     {
         sendbuf[i] = i & 0xFF;

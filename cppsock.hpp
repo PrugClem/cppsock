@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-#if defined __linux__
+#if defined __linux__ || defined __CYGWIN__
 // Linux include files
 #include <sys/socket.h>
 #include <arpa/inet.h>
