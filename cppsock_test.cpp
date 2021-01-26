@@ -51,10 +51,10 @@ int main()
     std::cout << std::dec << std::endl;
 
     errno = 0;
-    std::cout << "Test case 1: resolving loopback addresses" << std::endl;
+    std::cout << "Test case 1: resolving passive loopback addresses" << std::endl;
     std::vector<cppsock::addressinfo> ainfo;
     cppsock::addressinfo hints;
-    hints.reset().set_family(AF_INET).set_socktype(SOCK_STREAM).set_protocol(IPPROTO_TCP).set_passive(true);
+    hints.reset().set_socktype(SOCK_STREAM).set_protocol(IPPROTO_TCP).set_passive(true);
     error_t gai_err = cppsock::getaddrinfo(nullptr, "10000", &hints, ainfo);
     if(gai_err != 0)    std::cout << "error resolving: (" << gai_err << ") " << gai_strerror(gai_err) << std::endl;
     else                std::cout << "No error resolving" << std::endl;
