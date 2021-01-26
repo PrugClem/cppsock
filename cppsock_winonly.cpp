@@ -3,7 +3,7 @@
  *  date:   2020-12-22
  *  desc:   implementation to load windows' WSA library which is required to use sockets in windows
  */
-#if defined _WIN32 || defined __CYGWIN__
+#if defined _WIN32
 // This is needed becuase windows requires initialisation of a dll to run sockets.
 // Linux uses systemcalls and does not need such a gross sh*t
 #include <winsock2.h>

@@ -95,8 +95,6 @@ int main()
     cppsock::tcp_server_setup(listener, nullptr, 10003, 2);                     check_errno("Error setting up TCP server");
     cppsock::tcp_client_connect(client, nullptr, 10003);                        check_errno("Error connecting to TCP server");
     listener.accept(server);                                                    check_errno("Error accepting TCP connection");
-    print_details(client, "client-side connection socket");                     check_errno("Error printing client-side connection details");
-    print_details(server, "server-side connection socket");                     check_errno("Error printing server-side connection details");
     client.send(sendbuf, buflen, 0);                                            check_errno("Error sending data");
     std::cout << "bytes available: " << server.available() << std::endl;        check_errno("Error getting available bytes");
     server.recv(recvbuf, buflen, 0);                                            check_errno("Error receiving data");
