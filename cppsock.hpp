@@ -551,10 +551,18 @@ namespace cppsock
      */
     error_t tcp_client_connect(socket &client, const char *hostname, const char *service);
     /**
+     *  @brief sets a socket up to be a UDP socket
+     *  @param sock invalid socket that should be used to set up the udp socket
+     *  @param hostname hostname / address the socket should listen to
+     *  @param service service name / port number in string for the port the socket should listen to; if the local port doesn't matter, use "0"
+     *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+     */
+    error_t udp_socket_setup(socket &sock, const char *hostname, const char *service);
+    /**
      *  @brief sets up a TCP server, binds and sets the listener socket into listening state
      *  @param listener invalid socket that should be used as the listening socket, will be initialised, bound and set into listening state
      *  @param hostname the hostname / address the server should listen to, nullptr to let it listen on every IP device
-     *  @param port port number the server should listen to in host byte order
+     *  @param port port number the server should listen to, in host byte order
      *  @param backlog how many unestablished connections should be logged
      *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
      */
@@ -563,10 +571,27 @@ namespace cppsock
      *  @brief connects a TCP client to a server and connects the provided socket
      *  @param client invalid socket that should be used to connect to the server
      *  @param hostname hostname / IP address of the server
-     *  @param port port number the client should connect to in host byte order
+     *  @param port port number the client should connect to, in host byte order
      *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
      */
     error_t tcp_client_connect(socket& client, const char* hostname, uint16_t port);
+    /**
+     *  @brief sets a socket up to be a UDP socket
+     *  @param sock invalid socket that should be used to set up the udp socket
+     *  @param hostname hostname / address the socket should listen to
+     *  @param port port number the socket should use, in host byte order; if the local port doesn't matter, use port 0
+     *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
+     */
+    error_t udp_socket_setup(socket &sock, const char *hostname, uint16_t port);
+
+    // loopback address constants, default is IPv6
+    template <uint16_t port, sa_family_t fam = AF_INET6> const cppsock::socketaddr loopback;
+    template <uint16_t port> const cppsock::socketaddr loopback<port, AF_INET> = cppsock::socketaddr("127.0.0.1", port);
+    template <uint16_t port> const cppsock::socketaddr loopback<port, AF_INET6> = cppsock::socketaddr("::1", port);
+    // any address constants, default is IPv6
+    template<uint16_t port, sa_family_t fam = AF_INET6> const cppsock::socketaddr any_addr;
+    template<uint16_t port> const cppsock::socketaddr any_addr<port, AF_INET> = cppsock::socketaddr("0.0.0.0", port);
+    template<uint16_t port> const cppsock::socketaddr any_addr<port, AF_INET6> = cppsock::socketaddr("::", port);
 
     /**
      *  @brief converts a number from host byte order to network byte order.

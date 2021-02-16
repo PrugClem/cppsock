@@ -88,6 +88,34 @@ error_t cppsock::tcp_client_connect(cppsock::socket &client, const char *hostnam
     return -1; // no address could be connected to
 }
 
+error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, const char *service)
+{
+    std::vector<addressinfo> res;
+    addressinfo hints;
+    error_t errno_old = errno;
+
+    hints.reset().set_socktype(SOCK_DGRAM).set_protocol(IPPROTO_UDP);
+    if(cppsock::getaddrinfo(hostname, service, &hints, res) != 0)
+    {
+        // getaddrinfo failed
+        return -2;
+    }
+    if(res.size() == 0)
+    {
+        // no results
+        return -3;
+    }
+    for(addressinfo &addr : res)
+    {
+        sock.close();
+        if(sock.init(addr.get_family(), addr.get_socktype(), addr.get_protocol()) == (error_t)SOCKET_ERROR) continue;
+        if(sock.bind(addr) == SOCKET_ERROR) continue;
+        errno = errno_old;
+        return 0;
+    }
+    return -1;
+}
+
 error_t cppsock::tcp_server_setup(cppsock::socket& listener, const char* hostname, uint16_t port, int backlog)
 {
     std::stringstream ss;
@@ -103,6 +131,14 @@ error_t cppsock::tcp_client_connect(cppsock::socket& client, const char* hostnam
     ss.clear();
     ss << port;
     return tcp_client_connect(client, hostname, ss.str().c_str());
+}
+error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, uint16_t port)
+{
+    std::stringstream ss;
+
+    ss.clear();
+    ss << port;
+    return udp_socket_setup(sock, hostname, ss.str().c_str());
 }
 
 template<> uint16_t cppsock::hton<uint16_t>(uint16_t p)
