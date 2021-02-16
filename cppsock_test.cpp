@@ -76,10 +76,12 @@ int main()
 
     std::cout << "Test 2: Simple UDP socket, port 10002" << std::endl;
     cppsock::udp_socket_setup(server, nullptr, 10002);                              check_errno("Error setting up udp socket 10002");
-    cppsock::udp_socket_setup(client, nullptr, (uint16_t)0);                        check_errno("Error setting up udp socket null");
+    cppsock::udp_socket_setup(client, nullptr, (uint16_t)0);                        check_errno("Error setting up udp socket 0");
+    cppsock::udp_socket_setup(listener, cppsock::loopback<0>);                      check_errno("Error setting up udp socket any");
     std::cout << "udp socket, port 10002: " << server.getsockname() << std::endl;   check_errno("Error printing udp 10002 sockname");
     std::cout << "udp socket, port 0: " << client.getsockname() << std::endl;       check_errno("Error printing udp null socket");
-    server.close(); client.close(); std::cout << std::endl;                         check_errno("Error closing sockets");
+    std::cout << "udp socket any: " << listener.getsockname() << std::endl;         check_errno("Error printing udp any socket");
+    listener.close(); server.close(); client.close(); std::cout << std::endl;       check_errno("Error closing sockets");
 
     std::cout << "Test 3: Socket options" << std::endl;
     cppsock::tcp_server_setup(listener, nullptr, 10003, 2);                                                                                 check_errno("Error setting up TCP server");
@@ -113,7 +115,7 @@ int main()
     memset(recvbuf, 0, sizeof(recvbuf));
     // explicit IPv6
     cppsock::udp_socket_setup(server, "::", 10005);                             check_errno("Error setting up UDP socket port 10005");
-    cppsock::udp_socket_setup(client, "::", (uint16_t)0);                       check_errno("Error setting up UDP socket port 0");
+    cppsock::udp_socket_setup(client, cppsock::any_addr<0, AF_INET6>);          check_errno("Error setting up UDP socket port 0");
     client.sendto(sendbuf, buflen, 0, &cppsock::loopback<10005, AF_INET6>);     check_errno("Error sending data");
     server.recvfrom(recvbuf, buflen, 0, nullptr);                               check_errno("Error receiving data");
     server.close(); client.close(); std::cout;                                  check_errno("Error closing sockets");
