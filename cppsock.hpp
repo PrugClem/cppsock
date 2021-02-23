@@ -29,12 +29,12 @@ constexpr int SOCKET_ERROR = -1;
 inline int closesocket(socket_t s){return close(s);}
 inline int ioctlsocket(socket_t s, long cmd, void *argp) {return ioctl(s, cmd, argp);}
 
-// this is needed because windows is stupid and does not set errno
+// this is needed because windows does not set errno
 // however in linux nothing has to be done
 #define __set_errno_from_WSA(){}
 #define __is_error(s) (s < 0)
 #elif defined _WIN32
-// Windows user newer versions
+// Windows use newer versions
 #undef WINVER
 #define WINVER 0x0A00
 #undef _WIN32_WINNT
@@ -275,6 +275,8 @@ namespace cppsock
      *  @brief resolves a hostname
      *  @param hostname hostname that should be resolved, nullptr to use loopback
      *  @param service service name or port number in string format, e.g. "http" or "80" results in port number 80
+     *  @param hints hints to restrict the results
+     *  @param output reference to a output container to write the results to
      *  @return 0 if everything went right, anything else indicates an error that can pe printed with gai_strerror()
      */
     error_t getaddrinfo(const char *hostname, const char* service, const addressinfo *hints, std::vector<addressinfo>& output);
@@ -534,86 +536,102 @@ namespace cppsock
      */
     std::string hostname();
     /**
+     *  @brief error codes for utility fuctions
+     */
+    enum utility_error_t : error_t
+    {
+        utility_error_none = 0,         // status code to indicate successful execution
+        utility_error_fail = -1,        // utility call failed to execute successfully, no more information provided
+        utility_error_initialised = -2, // socket is already initialised
+        utility_error_gai_fail = -3,    // getaddressinfo() has failed to resolve the given parameter
+        utility_error_no_results = -4,  // getaddressinfo() as not given any results
+        utility_error_no_success = -5   // no address resolved by getaddressinfo() could successfully be used
+    };
+    /**
      *  @brief sets up a TCP server, binds and sets the listener socket into listening state
      *  @param listener invalid socket that should be used as the listening socket, will be initialised, bound and set into listening state
      *  @param hostname the hostname / address the server should listen to, nullptr to let it listen on every IP device
      *  @param serivce service name / port number in string for the port the server should listen to e.g. "http" or "80" for port 80
      *  @param backlog how many unestablished connections should be logged by the underlying OS
-     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
+     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror(), 
+     *          a code of nonzero indicates an error and errno is set to the last error
      */
-    error_t tcp_listener_setup(socket &listener, const char *hostname, const char *service, int backlog);
+    utility_error_t tcp_listener_setup(socket &listener, const char *hostname, const char *service, int backlog);
     /**
      *  @brief connects a TCP client to a server and connects the provided socket
      *  @param client invalid socket that should be used to connect to the server
      *  @param hostname hostname / IP address of the server
      *  @param service service name / port number in string for the port the client should connect to e.g. "http" or "80" for port 80
-     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
+     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror(), 
+     *          a code of nonzero indicates an error and errno is set to the last error
      */
-    error_t tcp_client_connect(socket &client, const char *hostname, const char *service);
+    utility_error_t tcp_client_connect(socket &client, const char *hostname, const char *service);
     /**
      *  @brief sets a socket up to be a UDP socket
      *  @param sock invalid socket that should be used to set up the udp socket
      *  @param hostname hostname / address the socket should listen to
      *  @param service service name / port number in string for the port the socket should listen to; if the local port doesn't matter, use "0"
-     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
+     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror(), 
+     *          a code of nonzero indicates an error and errno is set to the last error
      */
-    error_t udp_socket_setup(socket &sock, const char *hostname, const char *service);
+    utility_error_t udp_socket_setup(socket &sock, const char *hostname, const char *service);
     /**
      *  @brief sets up a TCP server, binds and sets the listener socket into listening state
      *  @param listener invalid socket that should be used as the listening socket, will be initialised, bound and set into listening state
      *  @param hostname the hostname / address the server should listen to, nullptr to let it listen on every IP device
      *  @param port port number the server should listen to, in host byte order
      *  @param backlog how many unestablished connections should be logged by the underlying OS
-     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
+     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror(), 
+     *          a code of nonzero indicates an error and errno is set to the last error
      */
 
-    error_t tcp_listener_setup(socket &listener, const char* hostname, uint16_t port, int backlog);
+    utility_error_t tcp_listener_setup(socket &listener, const char* hostname, uint16_t port, int backlog);
     /**
      *  @brief connects a TCP client to a server and connects the provided socket
      *  @param client invalid socket that should be used to connect to the server
      *  @param hostname hostname / IP address of the server
      *  @param port port number the client should connect to, in host byte order
-     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
+     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror(), 
+     *          a code of nonzero indicates an error and errno is set to the last error
      */
-    error_t tcp_client_connect(socket &client, const char* hostname, uint16_t port);
+    utility_error_t tcp_client_connect(socket &client, const char* hostname, uint16_t port);
     /**
      *  @brief sets a socket up to be a UDP socket
      *  @param sock invalid socket that should be used to set up the udp socket
      *  @param hostname hostname / address the socket should listen to
      *  @param port port number the socket should use, in host byte order; if the local port doesn't matter, use port 0
-     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
+     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror(), 
+     *          a code of nonzero indicates an error and errno is set to the last error
      */
-    error_t udp_socket_setup(socket &sock, const char *hostname, uint16_t port);
+    utility_error_t udp_socket_setup(socket &sock, const char *hostname, uint16_t port);
 
     /**
      *  @brief sets up a TCP server and sets the socket into the listening state
      *  @param listener, invalid socket that should be used as the listening socket, will be initialised, bound and set into listening state
      *  @param addr the address the server should listen to, cppsock::any_addr can be used to listen an every address
      *  @param backlog how many unestablished connections should be logged by the underlying OS
-     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
+     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror(), 
+     *          a code of nonzero indicates an error and errno is set to the last error
      */
-    error_t tcp_listener_setup(socket &listener, const socketaddr &addr, int backlog);
+    utility_error_t tcp_listener_setup(socket &listener, const socketaddr &addr, int backlog);
     /**
      *  @brief connects a TCP client to a server and connects the provided socket
      *  @param client invalid socket that should be used to connect to the server
      *  @param addr the server's IP address
-     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
+     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror(), 
+     *          a code of nonzero indicates an error and errno is set to the last error
      */
-    error_t tcp_client_connect(socket &client, const socketaddr &addr);
+    utility_error_t tcp_client_connect(socket &client, const socketaddr &addr);
     /**
      *  @brief sets up a UDP socket
      *  @param sock invalid socket that should be used to set up the udp socket
      *  @param addr local address for the udp socket, cppsock::any_addr can be used to not specify a address
-     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
+     *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror(), 
+     *          a code of nonzero indicates an error and errno is set to the last error
      */
-    error_t udp_socket_setup(socket &sock, const socketaddr &addr);
+    utility_error_t udp_socket_setup(socket &sock, const socketaddr &addr);
 
-    constexpr error_t utility_success = 0;      // status code to indicate successful execution
-    constexpr error_t utility_gai_fail = -1;    // getaddressinfo() has failed to resolve the given parameter
-    constexpr error_t utility_no_results = -2;  // getaddressinfo() as not given any results
-    constexpr error_t utility_no_success = -3;  // no address resolved by getaddressinfo() could successfully be used
-    constexpr error_t utility_fail = -4;        // utility call failed to execute successfully, no more information provided
-    const char *utility_strerror(error_t code); // convert an utility error code into a human-readable string
+    const char *utility_strerror(utility_error_t code); // convert an utility error code into a human-readable string
 
     // loopback address constants, default is IPv6
     template <uint16_t port, sa_family_t fam = AF_INET6> const cppsock::socketaddr loopback;
@@ -669,19 +687,19 @@ namespace cppsock
     /**
      *  @brief converts a 2-byte number from host byte order to network byte order
      */
-    template<> uint16_t hton<uint16_t>(uint16_t);
+    template<> inline uint16_t hton<uint16_t>(uint16_t in) {return htons(in);}
     /**
      *  @brief converts a 4-byte number from host byte order to network byte order
      */
-    template<> uint32_t hton<uint32_t>(uint32_t);
+    template<> inline uint32_t hton<uint32_t>(uint32_t in) {return htonl(in);}
     /**
      *  @brief converts a 2-byte number from network byte order to host byte order
      */
-    template<> uint16_t ntoh<uint16_t>(uint16_t);
+    template<> inline uint16_t ntoh<uint16_t>(uint16_t in) {return ntohs(in);}
     /**
      *  @brief converts a 4-byte number from network byte order to host byte order
      */
-    template<> uint32_t ntoh<uint32_t>(uint32_t);
+    template<> inline uint32_t ntoh<uint32_t>(uint32_t in) {return ntohl(in);}
 
     // backwards compatiblity function, use tcp_listener_setup instead
     [[deprecated]] inline error_t tcp_server_setup(socket &listener, const char *hostname, const char *service, int backlog) {return tcp_listener_setup(listener, hostname, service, backlog);}

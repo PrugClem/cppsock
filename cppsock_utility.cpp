@@ -26,97 +26,103 @@ std::string cppsock::hostname()
     return ret;
 }
 
-error_t cppsock::tcp_listener_setup(cppsock::socket &listener, const char *hostname, const char *service, int backlog)
+utility_error_t cppsock::tcp_listener_setup(cppsock::socket &listener, const char *hostname, const char *service, int backlog)
 {
     std::vector<cppsock::addressinfo> res;
     addressinfo hints;
-    error_t errno_old = errno; // save old errno number to rewrite it in the case of success
+    error_t errno_last = errno; // store errno
 
+    if(listener.is_valid()) return cppsock::utility_error_initialised;
     hints.reset().set_socktype(SOCK_STREAM).set_protocol(IPPROTO_TCP).set_passive(true); // set hints to TCP for bind()-ing
     if(cppsock::getaddrinfo(hostname, service, &hints, res) != 0)   // get addresses to bind
     {
         // getaddressinfo failed
-        return cppsock::utility_gai_fail;
+        return cppsock::utility_error_gai_fail;
     }
     if(res.size() == 0)
     {
         // no results given
-        return cppsock::utility_no_results;
+        return cppsock::utility_error_no_results;
     }
     for(addressinfo &ai : res) // go through every address
-    { // if an error occurs, continue jumps here and the loop starts over with the next address
-        listener.close();                                                             // close listener socket and discard the content of errno
-        if(listener.init(ai.get_family(), ai.get_socktype(), ai.get_protocol()) == (error_t)INVALID_SOCKET) continue; // init listener socket
-        if(listener.bind(ai) == SOCKET_ERROR) continue; // bind address
-        if(listener.listen(backlog) == SOCKET_ERROR) continue;  // set socket into listening state
-        errno = errno_old; // If everything went fine, restore errno to previous vale
-        return cppsock::utility_success; // if this is reached, everything went fine
+    { 
+        cppsock::utility_error_t err = cppsock::tcp_listener_setup(listener, ai, backlog);
+        if(err == cppsock::utility_error_none)
+        {
+            return cppsock::utility_error_none;
+        }
+        errno_last = errno; // store errno
+        errno = 0; // reset errno in case of a fail
     }
-    return cppsock::utility_no_success; // if this is reached, no address coule be used to bind
+    errno = errno_last; // restore last errno if no address could be used
+    return cppsock::utility_error_no_success; // if this is reached, no address coule be used to bind
 }
 
-error_t cppsock::tcp_client_connect(cppsock::socket &client, const char *hostname, const char *service)
+utility_error_t cppsock::tcp_client_connect(cppsock::socket &client, const char *hostname, const char *service)
 {
     std::vector<cppsock::addressinfo> res;
     addressinfo hints;
-    error_t errno_old = errno; // save old errno number to rewrite it in the case of success
+    error_t errno_last = errno;
 
+    if(client.is_valid()) return cppsock::utility_error_initialised;
     hints.reset().set_socktype(SOCK_STREAM).set_protocol(IPPROTO_TCP); // set hints to TCP for connect()-ing
     if(cppsock::getaddrinfo(hostname, service, &hints, res) != 0) // get addresses to connect
     {
         // getaddressinfo failed
-        return cppsock::utility_gai_fail;
+        return cppsock::utility_error_gai_fail;
     }
     if(res.size() == 0)
     {
         // no results given
-        return cppsock::utility_no_results;
+        return cppsock::utility_error_no_results;
     }
     for(addressinfo &addr : res) // go through every address
     {
-        client.init(addr.get_family(), addr.get_socktype(), addr.get_protocol()); // init client socket
-        if(client.connect(addr) == SOCKET_ERROR) // try to connect
-        {   
-            client.close(); // an error occured, close the socket and try the next address
+        cppsock::utility_error_t err = cppsock::tcp_client_connect(client, addr);
+        if(err == cppsock::utility_error_none)
+        {
+            return cppsock::utility_error_none;
         }
-        else
-        {   
-            errno = errno_old; // If everything went fine, restore errno to previous vale
-            return cppsock::utility_success; // connect was successful, return immideatly
-        }
+        errno_last = errno; // store errno
+        errno = 0; // reset errno in case of a fail
     }
-    return cppsock::utility_no_success; // no address could be connected to
+    errno = errno_last; // restore last errno if no address could be used
+    return cppsock::utility_error_no_success; // no address could be connected to
 }
 
-error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, const char *service)
+utility_error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, const char *service)
 {
     std::vector<addressinfo> res;
     addressinfo hints;
-    error_t errno_old = errno;
+    error_t errno_last = errno;
 
+    if(sock.is_valid()) return cppsock::utility_error_initialised;
     hints.reset().set_socktype(SOCK_DGRAM).set_protocol(IPPROTO_UDP).set_passive(true);
     if(cppsock::getaddrinfo(hostname, service, &hints, res) != 0)
     {
         // getaddrinfo failed
-        return cppsock::utility_gai_fail;
+        return cppsock::utility_error_gai_fail;
     }
     if(res.size() == 0)
     {
         // no results
-        return cppsock::utility_no_results;
+        return cppsock::utility_error_no_results;
     }
     for(addressinfo &addr : res)
     {
-        sock.close();
-        if(sock.init(addr.get_family(), addr.get_socktype(), addr.get_protocol()) == (error_t)SOCKET_ERROR) continue;
-        if(sock.bind(addr) == SOCKET_ERROR) continue;
-        errno = errno_old;
-        return cppsock::utility_success;
+        cppsock::utility_error_t err = cppsock::udp_socket_setup(sock, addr);
+        if(err == cppsock::utility_error_none)
+        {
+            return cppsock::utility_error_none;
+        }
+        errno_last = errno; // store errno
+        errno = 0; // reset errno in case of a fail
     }
-    return cppsock::utility_no_success;
+    errno = errno_last; // restore errno if no address could be used
+    return cppsock::utility_error_no_success;
 }
 
-error_t cppsock::tcp_listener_setup(cppsock::socket& listener, const char* hostname, uint16_t port, int backlog)
+utility_error_t cppsock::tcp_listener_setup(cppsock::socket& listener, const char* hostname, uint16_t port, int backlog)
 {
     std::stringstream ss;
 
@@ -124,7 +130,7 @@ error_t cppsock::tcp_listener_setup(cppsock::socket& listener, const char* hostn
     ss << port;
     return tcp_listener_setup(listener, hostname, ss.str().c_str(), backlog);
 }
-error_t cppsock::tcp_client_connect(cppsock::socket& client, const char* hostname, uint16_t port)
+utility_error_t cppsock::tcp_client_connect(cppsock::socket& client, const char* hostname, uint16_t port)
 {
     std::stringstream ss;
 
@@ -132,7 +138,7 @@ error_t cppsock::tcp_client_connect(cppsock::socket& client, const char* hostnam
     ss << port;
     return tcp_client_connect(client, hostname, ss.str().c_str());
 }
-error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, uint16_t port)
+utility_error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, uint16_t port)
 {
     std::stringstream ss;
 
@@ -141,61 +147,52 @@ error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, u
     return udp_socket_setup(sock, hostname, ss.str().c_str());
 }
 
-error_t cppsock::tcp_listener_setup(cppsock::socket &listener, const cppsock::socketaddr &addr, int backlog)
+utility_error_t cppsock::tcp_listener_setup(cppsock::socket &listener, const cppsock::socketaddr &addr, int backlog)
 {
+    if(listener.is_valid()) return cppsock::utility_error_initialised;
     if(!__is_error(listener.init(addr.get_family(), SOCK_STREAM, IPPROTO_TCP)))
         if(!__is_error(listener.bind(addr)))
             if(!__is_error(listener.listen(backlog)))
-                return cppsock::utility_success;
-    return cppsock::utility_fail;
+                return cppsock::utility_error_none;
+    if(listener.is_valid()) listener.close(); // close socket is it was open
+    return cppsock::utility_error_fail;
 }
-error_t cppsock::tcp_client_connect(cppsock::socket &client, const cppsock::socketaddr &addr)
+utility_error_t cppsock::tcp_client_connect(cppsock::socket &client, const cppsock::socketaddr &addr)
 {
+    if(client.is_valid()) return cppsock::utility_error_initialised;
     if(!__is_error(client.init(addr.get_family(), SOCK_STREAM, IPPROTO_TCP)))
         if(!__is_error(client.connect(addr)))
-            return cppsock::utility_success;
-    return cppsock::utility_fail;
+            return cppsock::utility_error_none;
+    if(client.is_valid()) client.close(); // close socket is it was open
+    return cppsock::utility_error_fail;
 }
-error_t cppsock::udp_socket_setup(cppsock::socket &sock, const cppsock::socketaddr &addr)
+utility_error_t cppsock::udp_socket_setup(cppsock::socket &sock, const cppsock::socketaddr &addr)
 {
+    if(sock.is_valid()) return cppsock::utility_error_initialised;
     if(!__is_error(sock.init(addr.get_family(), SOCK_DGRAM, IPPROTO_UDP)))
         if(!__is_error(sock.bind(addr)))
-            return cppsock::utility_success;
-    return cppsock::utility_fail;
+            return cppsock::utility_error_none;
+    if(sock.is_valid()) sock.close(); // close socket is it was open
+    return cppsock::utility_error_fail;
 }
 
-const char *cppsock::utility_strerror(error_t code)
+const char *cppsock::utility_strerror(utility_error_t code)
 {
     switch (code)
     {
-    case cppsock::utility_success:
+    case cppsock::utility_error_none:
         return "Utility call was successful";
-    case cppsock::utility_gai_fail:
-        return "getaddrinfo() failed to execute";
-    case cppsock::utility_no_results:
-        return "getaddrinfo() didn't resolve any addresses";
-    case cppsock::utility_no_success:
-        return "none of the resolved addresses resulted in a success";
-    case cppsock::utility_fail:
+    case cppsock::utility_error_fail:
         return "utility function failed to execute successfully";
+    case cppsock::utility_error_initialised:
+        return "provided socket is already initialised";
+    case cppsock::utility_error_gai_fail:
+        return "getaddrinfo() failed to execute";
+    case cppsock::utility_error_no_results:
+        return "getaddrinfo() didn't resolve any addresses";
+    case cppsock::utility_error_no_success:
+        return "none of the resolved addresses resulted in a success";
     default:
         return "unknown error code provided";
     }
-}
-
-template<> uint16_t cppsock::hton<uint16_t>(uint16_t p)
-{
-    return htons(p);
-}
-template<> uint32_t cppsock::hton<uint32_t>(uint32_t p)
-{
-    return htonl(p);
-}
-template<> uint16_t cppsock::ntoh<uint16_t>(uint16_t p)
-{
-    return ntohs(p);
-}
-template<> uint32_t cppsock::ntoh<uint32_t>(uint32_t p)
-{
-    return ntohl(p);
 }
