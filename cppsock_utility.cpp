@@ -26,7 +26,7 @@ std::string cppsock::hostname()
     return ret;
 }
 
-error_t cppsock::tcp_server_setup(cppsock::socket &listener, const char *hostname, const char *service, int backlog)
+error_t cppsock::tcp_listener_setup(cppsock::socket &listener, const char *hostname, const char *service, int backlog)
 {
     std::vector<cppsock::addressinfo> res;
     addressinfo hints;
@@ -116,13 +116,13 @@ error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, c
     return cppsock::utility_no_success;
 }
 
-error_t cppsock::tcp_server_setup(cppsock::socket& listener, const char* hostname, uint16_t port, int backlog)
+error_t cppsock::tcp_listener_setup(cppsock::socket& listener, const char* hostname, uint16_t port, int backlog)
 {
     std::stringstream ss;
 
     ss.clear();
     ss << port;
-    return tcp_server_setup(listener, hostname, ss.str().c_str(), backlog);
+    return tcp_listener_setup(listener, hostname, ss.str().c_str(), backlog);
 }
 error_t cppsock::tcp_client_connect(cppsock::socket& client, const char* hostname, uint16_t port)
 {
@@ -141,7 +141,7 @@ error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, u
     return udp_socket_setup(sock, hostname, ss.str().c_str());
 }
 
-error_t cppsock::tcp_server_setup(cppsock::socket &listener, const cppsock::socketaddr &addr, int backlog)
+error_t cppsock::tcp_listener_setup(cppsock::socket &listener, const cppsock::socketaddr &addr, int backlog)
 {
     if(!__is_error(listener.init(addr.get_family(), SOCK_STREAM, IPPROTO_TCP)))
         if(!__is_error(listener.bind(addr)))

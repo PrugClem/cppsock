@@ -541,7 +541,7 @@ namespace cppsock
      *  @param backlog how many unestablished connections should be logged by the underlying OS
      *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
      */
-    error_t tcp_server_setup(socket &listener, const char *hostname, const char *service, int backlog);
+    error_t tcp_listener_setup(socket &listener, const char *hostname, const char *service, int backlog);
     /**
      *  @brief connects a TCP client to a server and connects the provided socket
      *  @param client invalid socket that should be used to connect to the server
@@ -567,7 +567,7 @@ namespace cppsock
      *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
      */
 
-    error_t tcp_server_setup(socket& listener, const char* hostname, uint16_t port, int backlog);
+    error_t tcp_listener_setup(socket &listener, const char* hostname, uint16_t port, int backlog);
     /**
      *  @brief connects a TCP client to a server and connects the provided socket
      *  @param client invalid socket that should be used to connect to the server
@@ -575,7 +575,7 @@ namespace cppsock
      *  @param port port number the client should connect to, in host byte order
      *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
      */
-    error_t tcp_client_connect(socket& client, const char* hostname, uint16_t port);
+    error_t tcp_client_connect(socket &client, const char* hostname, uint16_t port);
     /**
      *  @brief sets a socket up to be a UDP socket
      *  @param sock invalid socket that should be used to set up the udp socket
@@ -592,7 +592,7 @@ namespace cppsock
      *  @param backlog how many unestablished connections should be logged by the underlying OS
      *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror()
      */
-    error_t tcp_server_setup(socket &listener, const socketaddr &addr, int backlog);
+    error_t tcp_listener_setup(socket &listener, const socketaddr &addr, int backlog);
     /**
      *  @brief connects a TCP client to a server and connects the provided socket
      *  @param client invalid socket that should be used to connect to the server
@@ -682,6 +682,12 @@ namespace cppsock
      *  @brief converts a 4-byte number from network byte order to host byte order
      */
     template<> uint32_t ntoh<uint32_t>(uint32_t);
+
+    // backwards compatiblity function, use tcp_listener_setup instead
+    [[deprecated]] inline error_t tcp_server_setup(socket &listener, const char *hostname, const char *service, int backlog) {return tcp_listener_setup(listener, hostname, service, backlog);}
+    [[deprecated]] inline error_t tcp_server_setup(socket &listener, const char* hostname, uint16_t port, int backlog) {return tcp_listener_setup(listener, hostname, port, backlog);}
+    [[deprecated]] inline error_t tcp_server_setup(socket &listener, const socketaddr &addr, int backlog) {return tcp_listener_setup(listener, addr, backlog);}
+    
 } // namespace cppsock
 
 #endif // CPPSOCK_HPP_INCLUDED
