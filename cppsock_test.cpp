@@ -56,7 +56,7 @@ int main()
     cppsock::addressinfo hints;
     hints.reset().set_socktype(SOCK_STREAM).set_protocol(IPPROTO_TCP).set_passive(true);
     error_t gai_err = cppsock::getaddrinfo(nullptr, "10000", &hints, ainfo);
-    if(gai_err != 0)    {std::cout << "error resolving: (" << gai_err << ") " << gai_strerror(gai_err) << std::endl; errno = EHOSTDOWN;}
+    if(gai_err != 0)    {std::cout << "error resolving: (" << gai_err << ") " << gai_strerror(gai_err) << std::endl; errno = ENETDOWN;}
     else                {std::cout << "No error resolving" << std::endl;}
     std::cout << "total " << ainfo.size() << " results:" << std::endl;
     for(cppsock::addressinfo &a : ainfo)
