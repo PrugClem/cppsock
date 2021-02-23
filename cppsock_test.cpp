@@ -54,7 +54,7 @@ int main()
     std::cout << "Test 0: resolving passive loopback addresses" << std::endl;
     std::vector<cppsock::addressinfo> ainfo;
     cppsock::addressinfo hints;
-    hints.reset().set_socktype(SOCK_STREAM).set_protocol(IPPROTO_TCP).set_passive(true);
+    hints.reset().set_socktype(cppsock::socket_stream).set_protocol(cppsock::ip_protocol_tcp).set_passive(true);
     error_t gai_err = cppsock::getaddrinfo(nullptr, "10000", &hints, ainfo);
     if(gai_err != 0)    {std::cout << "error resolving: (" << gai_err << ") " << gai_strerror(gai_err) << std::endl; errno = ENETDOWN;}
     else                {std::cout << "No error resolving" << std::endl;}
@@ -114,10 +114,10 @@ int main()
     memset(recvbuf, 0, sizeof(recvbuf));
     // explicit IPv6
     cppsock::udp_socket_setup(server, "::", 10005);                             check_errno("Error setting up UDP socket port 10005");
-    cppsock::udp_socket_setup(client, cppsock::any_addr<0, AF_INET6>);          check_errno("Error setting up UDP socket port 0");
-    client.sendto(sendbuf, buflen, 0, &cppsock::loopback<10005, AF_INET6>);     check_errno("Error sending data");
+    cppsock::udp_socket_setup(client, cppsock::any_addr<0, cppsock::IPv6>);     check_errno("Error setting up UDP socket port 0");
+    client.sendto(sendbuf, buflen, 0, &cppsock::loopback<10005, cppsock::IPv6>);check_errno("Error sending data");
     server.recvfrom(recvbuf, buflen, 0, nullptr);                               check_errno("Error receiving data");
-    server.close(); client.close(); std::cout;                                  check_errno("Error closing sockets");
+    server.close(); client.close();                                             check_errno("Error closing sockets");
     if(memcmp(sendbuf, recvbuf, buflen) != 0) {print_error("ERROR: Data was received incorrectly"); return 1;}
     else {std::cout << "Data was received correctly" << std::endl;}
 

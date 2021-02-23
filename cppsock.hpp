@@ -65,12 +65,55 @@ using error_t = int;
 
 namespace cppsock
 {
+    /**
+     *  @brief enum for IP families
+     */
+    enum ip_family : sa_family_t
+    {
+        IP_unspec = AF_UNSPEC,  // unspecified / invalid IP family
+        IPv4 = AF_INET,         // ip family for IPv4
+        IPv6 = AF_INET6         // ip family for IPv6
+    };
+
+    /**
+     *  @brief socket types to specify socket behavioral
+     */
+    enum socket_type : int
+    {
+        socket_unspec = 0,              // invalid / unspecified socket type
+        socket_stream = SOCK_STREAM,    // connection-oriented socket type
+        socket_dgram = SOCK_DGRAM       // packet-oriented socket type
+    };
+
+    /**
+     *  @brief ip protocols to use (TCP, UDP)
+     */
+    enum ip_protocol : int
+    {
+        ip_protocol_unspec = 0,         // invalid / unspecified protocol
+        ip_protocol_tcp = IPPROTO_TCP,  // use TCP Protocol
+        ip_protocol_udp = IPPROTO_UDP   // use UDP protocol
+    };
+
+    /**
+     *  @brief error codes for utility fuctions
+     */
+    enum utility_error_t : error_t
+    {
+        utility_error_none = 0,         // status code to indicate successful execution
+        utility_error_fail = -1,        // utility call failed to execute successfully, no more information provided
+        utility_error_initialised = -2, // socket is already initialised
+        utility_error_gai_fail = -3,    // getaddressinfo() has failed to resolve the given parameter
+        utility_error_no_results = -4,  // getaddressinfo() as not given any results
+        utility_error_no_success = -5   // no address resolved by getaddressinfo() could successfully be used
+    };
+    
     class socketaddr
     {
     protected:
         union
         {
-            sa_family_t sa_family;
+            ip_family sa_family;
             sockaddr sa;
             sockaddr_in sin;
             sockaddr_in6 sin6;
@@ -78,11 +121,11 @@ namespace cppsock
         } sa;
     public:
         /**
-         *  @param fam can be AF_INET or AF_INET6
+         *  @param fam can be cppsock::IPv4 or cppsock::IPv6
          *  @param str string that should be checked
          *  @return true if the proveided string is a correctly formatted IP address
          */
-        static bool is(sa_family_t fam, const std::string &str);
+        static bool is(ip_family fam, const std::string &str);
         /**
          *  @param str string that should be checked
          *  @return true if the provided string is a correctly formatted IPv4 address
@@ -125,9 +168,9 @@ namespace cppsock
 
         /**
          *  @brief clears the structure and sets the address family
-         *  @param fam AF_INET for IPv4 or AF_INET6 for IPv6
+         *  @param fam cppsock::IPv4 for IPv4 or cppsock::IPv6 for IPv6
          */
-        void set_family(sa_family_t fam);
+        void set_family(ip_family fam);
         /**
          *  @brief sets the address of the structure
          *  @param addr the address that should be written into the structure
@@ -158,7 +201,7 @@ namespace cppsock
          *  @brief gets the address family
          *  @param out reference to a buffer where the family type should be written into
          */
-        void get_family(sa_family_t &out) const;
+        void get_family(ip_family &out) const;
         /**
          *  @brief get the address
          *  @param out reference to a string where the address should be written into
@@ -176,7 +219,7 @@ namespace cppsock
          *  @brief gets the address family
          *  @return the address family
          */
-        sa_family_t get_family() const;
+        ip_family get_family() const;
         /**
          *  @brief get the address
          *  @return string containing the address, if an error occured, the string is empty
@@ -231,17 +274,17 @@ namespace cppsock
          *  @brief sets the family type for resolving
          *  @return this structure to allow chaining
          */
-        addressinfo &set_family(sa_family_t);
+        addressinfo &set_family(ip_family);
         /**
          *  @brief sets the socket type for this strucutre, can be SOCK_STREAM for TCP or SOCK_DGRAM for UDP
          *  @return this structure to allow chaining
          */
-        addressinfo &set_socktype(int);
+        addressinfo &set_socktype(socket_type);
         /**
          *  @brief specifies the protocol for this structure, 0 to use socktype defualts
          *  @return this structure to allow chaining
          */
-        addressinfo &set_protocol(int);
+        addressinfo &set_protocol(ip_protocol);
         /**
          *  @brief sets the passive flag, if the passive flag is true, the results can be used for bind()-ing, if the passive flag is false, the address can be used for connect()-ing
          *  @return this structure to allow chaining
@@ -255,15 +298,15 @@ namespace cppsock
         /**
          *  @return address family
          */
-        sa_family_t get_family() const;
+        ip_family get_family() const;
         /**
          *  @return socket type
          */
-        int get_socktype() const;
+        socket_type get_socktype() const;
         /**
          *  @return protocol that should be used
          */
-        int get_protocol() const;
+        ip_protocol get_protocol() const;
 
         /**
          *  cast operator for easy use
@@ -318,12 +361,12 @@ namespace cppsock
 
         /**
          *  @brief initialise a socket and make it valid
-         *  @param fam family to use, AF_INET for IPv4, AF_INET6 for IPv6
+         *  @param fam family to use, cppsock::IPv4 for IPv4, cppsock::IPv6 for IPv6
          *  @param type the socket type, e.g. SOCK_STREAM or SOCK_DGRAM
          *  @param porotcol protocol to use, e.g. IPPROTO_TCP
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t init(sa_family_t fam, int type, int protocol);
+        error_t init(ip_family fam, socket_type type, ip_protocol protocol);
         /**
          *  @brief bind this socket to a given address, a bound socket can be used to accept TCP connections
          *  @param addr address the socket should be bound to
@@ -516,12 +559,12 @@ namespace cppsock
          *  @param buf reference to a buffer where the socktype should be written into
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t get_socktype(int &buf) const;
+        error_t get_socktype(socket_type &buf) const;
         /**
          *  @brief get the socket type (SOCK_STREAM, SOCK_DGRAM, e.t.c)
          *  @return socket type, in an error occured, the return value is undefined
          */
-        int get_socktype() const;
+        socket_type get_socktype() const;
     };
 
     /**
@@ -535,18 +578,7 @@ namespace cppsock
      *  @return the machine's hostname, if an error occured the return value is undefined
      */
     std::string hostname();
-    /**
-     *  @brief error codes for utility fuctions
-     */
-    enum utility_error_t : error_t
-    {
-        utility_error_none = 0,         // status code to indicate successful execution
-        utility_error_fail = -1,        // utility call failed to execute successfully, no more information provided
-        utility_error_initialised = -2, // socket is already initialised
-        utility_error_gai_fail = -3,    // getaddressinfo() has failed to resolve the given parameter
-        utility_error_no_results = -4,  // getaddressinfo() as not given any results
-        utility_error_no_success = -5   // no address resolved by getaddressinfo() could successfully be used
-    };
+
     /**
      *  @brief sets up a TCP server, binds and sets the listener socket into listening state
      *  @param listener invalid socket that should be used as the listening socket, will be initialised, bound and set into listening state
@@ -634,13 +666,13 @@ namespace cppsock
     const char *utility_strerror(utility_error_t code); // convert an utility error code into a human-readable string
 
     // loopback address constants, default is IPv6
-    template <uint16_t port, sa_family_t fam = AF_INET6> const cppsock::socketaddr loopback;
-    template <uint16_t port> const cppsock::socketaddr loopback<port, AF_INET> = cppsock::socketaddr("127.0.0.1", port);
-    template <uint16_t port> const cppsock::socketaddr loopback<port, AF_INET6> = cppsock::socketaddr("::1", port);
+    template <uint16_t port, ip_family fam = cppsock::IPv6> const cppsock::socketaddr loopback;
+    template <uint16_t port> const cppsock::socketaddr loopback<port, cppsock::IPv4> = cppsock::socketaddr("127.0.0.1", port);
+    template <uint16_t port> const cppsock::socketaddr loopback<port, cppsock::IPv6> = cppsock::socketaddr("::1", port);
     // any address constants, default is IPv6
-    template<uint16_t port, sa_family_t fam = AF_INET6> const cppsock::socketaddr any_addr;
-    template<uint16_t port> const cppsock::socketaddr any_addr<port, AF_INET> = cppsock::socketaddr("0.0.0.0", port);
-    template<uint16_t port> const cppsock::socketaddr any_addr<port, AF_INET6> = cppsock::socketaddr("::", port);
+    template<uint16_t port, ip_family fam = cppsock::IPv6> const cppsock::socketaddr any_addr;
+    template<uint16_t port> const cppsock::socketaddr any_addr<port, cppsock::IPv4> = cppsock::socketaddr("0.0.0.0", port);
+    template<uint16_t port> const cppsock::socketaddr any_addr<port, cppsock::IPv6> = cppsock::socketaddr("::", port);
 
     /**
      *  @brief converts a number from host byte order to network byte order.
