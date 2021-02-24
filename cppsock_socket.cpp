@@ -37,7 +37,7 @@ void socket::swap(socket &other)
     std::swap(this->sock, other.sock);
 }
 
-error_t socket::init(sa_family_t fam, int type, int protocol)
+error_t socket::init(cppsock::ip_family fam, cppsock::socket_type type, cppsock::ip_protocol protocol)
 {
     this->sock = ::socket(fam, type, protocol);
     if( __is_error(this->sock) )
@@ -279,16 +279,16 @@ bool socket::get_reuseaddr() const
     return buf;
 }
 
-error_t socket::get_socktype(int &socktype) const
+error_t socket::get_socktype(cppsock::socket_type &socktype) const
 {
     socklen_t len = sizeof(socktype);
     error_t ret = this->getsockopt(SO_TYPE, &socktype, &len);
     return ret;
 }
 
-int socket::get_socktype() const
+cppsock::socket_type socket::get_socktype() const
 {
-    int buf;
+    cppsock::socket_type buf;
     this->get_socktype(buf);
     return buf;
 }

@@ -21,19 +21,19 @@ cppsock::addressinfo& cppsock::addressinfo::reset()
     return *this;
 }
 
-cppsock::addressinfo &cppsock::addressinfo::set_family(sa_family_t fam)
+cppsock::addressinfo &cppsock::addressinfo::set_family(cppsock::ip_family fam)
 {
     this->_data.ai_family = fam;
     return *this;
 }
 
-cppsock::addressinfo &cppsock::addressinfo::set_socktype(int sockt)
+cppsock::addressinfo &cppsock::addressinfo::set_socktype(cppsock::socket_type sockt)
 {
     this->_data.ai_socktype = sockt;
     return *this;
 }
 
-cppsock::addressinfo &cppsock::addressinfo::set_protocol(int proto)
+cppsock::addressinfo &cppsock::addressinfo::set_protocol(cppsock::ip_protocol proto)
 {
     this->_data.ai_protocol = proto;
     return *this;
@@ -55,19 +55,19 @@ cppsock::socketaddr cppsock::addressinfo::get_addr() const
 }
 
 
-sa_family_t cppsock::addressinfo::get_family() const
+cppsock::ip_family cppsock::addressinfo::get_family() const
 {
-    return this->_data.ai_family;
+    return (cppsock::ip_family)this->_data.ai_family;
 }
 
-int cppsock::addressinfo::get_socktype() const
+cppsock::socket_type cppsock::addressinfo::get_socktype() const
 {
-    return this->_data.ai_socktype;
+    return (cppsock::socket_type)this->_data.ai_socktype;
 }
 
-int cppsock::addressinfo::get_protocol() const
+cppsock::ip_protocol cppsock::addressinfo::get_protocol() const
 {
-    return this->_data.ai_protocol;
+    return (cppsock::ip_protocol)this->_data.ai_protocol;
 }
 
 cppsock::addressinfo::operator socketaddr() const

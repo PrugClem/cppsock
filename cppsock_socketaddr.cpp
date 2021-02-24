@@ -7,7 +7,7 @@
 
 using namespace cppsock;
 
-bool socketaddr::is(sa_family_t family, const std::string &ip)
+bool socketaddr::is(cppsock::ip_family family, const std::string &ip)
 {
     sockaddr_storage ss;
     return inet_pton(family, ip.data(), &ss) == 1;
@@ -15,12 +15,12 @@ bool socketaddr::is(sa_family_t family, const std::string &ip)
 
 bool socketaddr::is_ipv4(const std::string &ip)
 {
-    return is(AF_INET, ip);
+    return is(cppsock::IPv4, ip);
 }
 
 bool socketaddr::is_ipv6(const std::string &ip)
 {
-    return is(AF_INET6, ip);
+    return is(cppsock::IPv6, ip);
 }
 
 socketaddr::socketaddr()
@@ -50,7 +50,7 @@ const sockaddr *socketaddr::data() const
     return &this->sa.sa;
 }
 
-void socketaddr::set_family(sa_family_t fam)
+void socketaddr::set_family(cppsock::ip_family fam)
 {
     memset(&this->sa, 0, sizeof(this->sa));
     this->sa.sa_family = fam;
@@ -97,10 +97,10 @@ error_t socketaddr::set_port(uint16_t port)
 error_t socketaddr::set(const std::string& addr, uint16_t port)
 {
     error_t error;
-    if( is(AF_INET, addr) )
-        this->set_family(AF_INET);
-    else if( is(AF_INET6, addr) )
-        this->set_family(AF_INET6);
+    if( is(cppsock::IPv4, addr) )
+        this->set_family(cppsock::IPv4);
+    else if( is(cppsock::IPv6, addr) )
+        this->set_family(cppsock::IPv6);
     else
         return errno = EAFNOSUPPORT;
 
@@ -114,7 +114,7 @@ error_t socketaddr::set(const std::string& addr, uint16_t port)
 
 void socketaddr::set(const sockaddr* data)
 {
-    this->set_family(AF_UNSPEC);
+    this->set_family(cppsock::IP_unspec);
     if(data->sa_family == AF_INET) // copy IPv4 address structure
         memcpy(&this->sa.sin, data, sizeof(this->sa.sin));
     else if(data->sa_family == AF_INET6) // copy IPv6 address structure
@@ -122,7 +122,7 @@ void socketaddr::set(const sockaddr* data)
     return;
 }
 
-void socketaddr::get_family(sa_family_t &fam) const
+void socketaddr::get_family(cppsock::ip_family &fam) const
 {
     fam = this->sa.sa_family;
     return;
@@ -166,7 +166,7 @@ error_t socketaddr::get_port(uint16_t &port) const
     return 0;
 }
 
-sa_family_t socketaddr::get_family() const
+cppsock::ip_family socketaddr::get_family() const
 {
     return this->sa.sa_family;
 }
