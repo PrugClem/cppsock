@@ -58,6 +58,25 @@ using error_t = int;
 // this is needed because windows does not set errno
 #define __set_errno_from_WSA() {errno = WSAGetLastError();}
 #define __is_error(s) (s == SOCKET_ERROR)
+
+class __wsa_loader_class
+{
+    WSADATA wsaData;
+    int iResult;
+public:
+    inline __wsa_loader_class(){
+        // Initialize Winsock
+        iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+        if (iResult != 0) {
+            printf("WSAStartup failed with error: %d\n", iResult);
+            exit(1);
+        }
+    }
+    inline ~__wsa_loader_class(){
+         WSACleanup();
+    }
+};
+inline __wsa_loader_class __wsa_loader_instance;
 #else // elif defined __WIN32__
 // an unsupportet OS was used to compile, Library cannot compile
 #error unsupported OS used
@@ -94,6 +113,12 @@ namespace cppsock
         ip_protocol_tcp = IPPROTO_TCP,  // use TCP Protocol
         ip_protocol_udp = IPPROTO_UDP   // use UDP protocol
     };
+
+    using msg_flags = int;   // type for message flags
+    static constexpr msg_flags oob       = MSG_OOB;         // process out-of-band data
+    static constexpr msg_flags peek      = MSG_PEEK;        // peek incoming message, dont delete it from input queue
+    static constexpr msg_flags dontroute = MSG_DONTROUTE;   // send without using the routing table
+    static constexpr msg_flags waitall   = MSG_WAITALL;     // wait until the entire packet has been processed (sent / received)
 
     /**
      *  @brief error codes for utility fuctions
@@ -399,7 +424,7 @@ namespace cppsock
          *  @param flags changes behavior of the function call, use 0 for default behavioral
          *  @return if smaller than 0, an error occured and errno is set appropriately, the total amount of bytes sent otherwise
          */
-        ssize_t send(const void* data, size_t len, int flags);
+        ssize_t send(const void* data, size_t len, msg_flags flags);
         /**
          *  @brief receives data from a connected socket
          *  @param data pointer to the start of the buffer where the data should be written into
@@ -407,8 +432,7 @@ namespace cppsock
          *  @param flags changes behavior of the function call, use 0 for default behavioral
          *  @return 0 if the connection has been closed, smaller than 0 if an error occured, the amount of bytes received otherwise
          */
-        ssize_t recv(void* data, size_t maxlen, int flags);
-
+        ssize_t recv(void* data, size_t maxlen, msg_flags flags);
         /**
          *  @brief sends data over a socket
          *  @param data pointer to the start of the data array
@@ -417,7 +441,7 @@ namespace cppsock
          *  @param dst pointer to a class where the data should be sent to, use nullptr to use default address
          *  @return if smaller than 0, an error occured and errno is set appropriately, the total amount of bytes sent otherwise
          */
-        ssize_t sendto(const void* data, size_t, int flags, const socketaddr *dst);
+        ssize_t sendto(const void* data, size_t, msg_flags flags, const socketaddr *dst);
         /**
          *  @brief receives data from a connected socket
          *  @param data pointer to the start of the buffer where the data should be written into
@@ -426,7 +450,7 @@ namespace cppsock
          *  @param src pointer to a class where the source address should be written into, use nullptr do discard the src address
          *  @return 0 if the connection has been closed, smaller than 0 if an error occured, the amount of bytes received otherwise
          */
-        ssize_t recvfrom(void* data, size_t, int flags, socketaddr *src);
+        ssize_t recvfrom(void* data, size_t, msg_flags flags, socketaddr *src);
 
         /**
          *  @brief get the amount of bytes ready to read
@@ -451,7 +475,7 @@ namespace cppsock
         {
             shutdown_send = SHUT_WR,
             shutdown_recv = SHUT_RD,
-            shutdown_both = SHUT_RDWR
+            shutdown_both = SHUT_RDWR,
         };
         /**
          *  @brief shuts down parts of the socket or properly terminates a socket connection, THIS CALL IS IRREVERSIBLE!
@@ -460,13 +484,6 @@ namespace cppsock
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
         error_t shutdown(socket::shutdown_mode how);
-        /**
-         *  @brief [[deprecated]] shuts down parts of the socket or properly terminates a socket connection, THIS CALL IS IRREVERSIBLE!
-         *  The socket remains valid, no data can be sent or received
-         *  @param how how the socket should be shut down, possible options: SHUT_RD / SHUT_WR / SHUT_RDWR
-         *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
-         */
-        [[deprecated]] error_t shutdown(int how);
         /**
          *  @brief closes and invalidates the socket
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
@@ -555,14 +572,14 @@ namespace cppsock
         bool    get_reuseaddr() const;
 
         /**
-         *  @brief get the socket type (SOCK_STREAM, SOCK_DGRAM, e.t.c)
-         *  @param buf reference to a buffer where the socktype should be written into
+         *  @brief get the socket type (cppsock::socket_stream, cppsock::socket_dgram, e.t.c)
+         *  @param buf reference to a buffer where the socket type should be written into
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
         error_t get_socktype(socket_type &buf) const;
         /**
-         *  @brief get the socket type (SOCK_STREAM, SOCK_DGRAM, e.t.c)
-         *  @return socket type, in an error occured, the return value is undefined
+         *  @brief get the socket type (cppsock::socket_stream, cppsock::socket_dgram, e.t.c)
+         *  @return socket type, if an error occured, the return value is undefined
          */
         socket_type get_socktype() const;
     };
@@ -733,11 +750,44 @@ namespace cppsock
      */
     template<> inline uint32_t ntoh<uint32_t>(uint32_t in) {return ntohl(in);}
 
-    // backwards compatiblity function, use tcp_listener_setup instead
-    [[deprecated]] inline error_t tcp_server_setup(socket &listener, const char *hostname, const char *service, int backlog) {return tcp_listener_setup(listener, hostname, service, backlog);}
-    [[deprecated]] inline error_t tcp_server_setup(socket &listener, const char* hostname, uint16_t port, int backlog) {return tcp_listener_setup(listener, hostname, port, backlog);}
-    [[deprecated]] inline error_t tcp_server_setup(socket &listener, const socketaddr &addr, int backlog) {return tcp_listener_setup(listener, addr, backlog);}
-    
+    namespace tcp
+    {
+        class socket;
+        class listener
+        {
+        protected:
+            cppsock::socket _sock;
+        public:
+            cppsock::utility_error_t setup(const cppsock::socketaddr &addr, int backlog);
+            cppsock::utility_error_t setup(const char *hostname, const char *service, int backlog);
+            cppsock::utility_error_t setup(const char *hostname, uint16_t port, int backlog);
+
+            error_t accept(cppsock::tcp::socket &output);
+            error_t close();
+        };
+
+        class socket
+        {
+        protected:
+            cppsock::socket _sock;
+        public:
+            std::streamsize send(const void *data, std::streamsize len, cppsock::msg_flags flags);
+            std::streamsize recv(void *data, std::streamsize max_len, cppsock::msg_flags flags);
+
+            friend class cppsock::tcp::listener;
+            const cppsock::socket &sock();
+
+            error_t shutdown(std::ios_base::openmode how);
+            error_t close();
+        };
+
+        class client : public cppsock::tcp::socket
+        {
+            cppsock::utility_error_t connect(const cppsock::socketaddr &addr);
+            cppsock::utility_error_t connect(const char *hostname, const char *service);
+            cppsock::utility_error_t connect(const char *hostname, uint16_t port);
+        };
+    } // namespace tcp
 } // namespace cppsock
 
 #endif // CPPSOCK_HPP_INCLUDED

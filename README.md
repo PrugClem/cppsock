@@ -11,4 +11,4 @@ a low-level implementation for POSIX sockets in C++ for windows and linux
        =================================================
        cppsock test completed successfully
 
-   Please note that you need the WSA library in Windows. This can be done by linking the file ``cppsock_winonly.cpp`` (from this repository) and the library ``-lws2_32`` (provided by windows) to the final program
+   Please note that you need the WSA library in Windows. This can be done by linking the library ``-lws2_32`` (provided by windows) to the final program

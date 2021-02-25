@@ -5,8 +5,6 @@
  */
 #include "cppsock.hpp"
 
-using namespace cppsock;
-
 error_t cppsock::hostname(std::string &strbuf)
 {
     char buf[256];
@@ -26,7 +24,7 @@ std::string cppsock::hostname()
     return ret;
 }
 
-utility_error_t cppsock::tcp_listener_setup(cppsock::socket &listener, const char *hostname, const char *service, int backlog)
+cppsock::utility_error_t cppsock::tcp_listener_setup(cppsock::socket &listener, const char *hostname, const char *service, int backlog)
 {
     std::vector<cppsock::addressinfo> res;
     addressinfo hints;
@@ -58,7 +56,7 @@ utility_error_t cppsock::tcp_listener_setup(cppsock::socket &listener, const cha
     return cppsock::utility_error_no_success; // if this is reached, no address coule be used to bind
 }
 
-utility_error_t cppsock::tcp_client_connect(cppsock::socket &client, const char *hostname, const char *service)
+cppsock::utility_error_t cppsock::tcp_client_connect(cppsock::socket &client, const char *hostname, const char *service)
 {
     std::vector<cppsock::addressinfo> res;
     addressinfo hints;
@@ -90,7 +88,7 @@ utility_error_t cppsock::tcp_client_connect(cppsock::socket &client, const char 
     return cppsock::utility_error_no_success; // no address could be connected to
 }
 
-utility_error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, const char *service)
+cppsock::utility_error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, const char *service)
 {
     std::vector<addressinfo> res;
     addressinfo hints;
@@ -122,7 +120,7 @@ utility_error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hos
     return cppsock::utility_error_no_success;
 }
 
-utility_error_t cppsock::tcp_listener_setup(cppsock::socket& listener, const char* hostname, uint16_t port, int backlog)
+cppsock::utility_error_t cppsock::tcp_listener_setup(cppsock::socket& listener, const char* hostname, uint16_t port, int backlog)
 {
     std::stringstream ss;
 
@@ -130,7 +128,7 @@ utility_error_t cppsock::tcp_listener_setup(cppsock::socket& listener, const cha
     ss << port;
     return tcp_listener_setup(listener, hostname, ss.str().c_str(), backlog);
 }
-utility_error_t cppsock::tcp_client_connect(cppsock::socket& client, const char* hostname, uint16_t port)
+cppsock::utility_error_t cppsock::tcp_client_connect(cppsock::socket& client, const char* hostname, uint16_t port)
 {
     std::stringstream ss;
 
@@ -138,7 +136,7 @@ utility_error_t cppsock::tcp_client_connect(cppsock::socket& client, const char*
     ss << port;
     return tcp_client_connect(client, hostname, ss.str().c_str());
 }
-utility_error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, uint16_t port)
+cppsock::utility_error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hostname, uint16_t port)
 {
     std::stringstream ss;
 
@@ -147,7 +145,7 @@ utility_error_t cppsock::udp_socket_setup(cppsock::socket &sock, const char *hos
     return udp_socket_setup(sock, hostname, ss.str().c_str());
 }
 
-utility_error_t cppsock::tcp_listener_setup(cppsock::socket &listener, const cppsock::socketaddr &addr, int backlog)
+cppsock::utility_error_t cppsock::tcp_listener_setup(cppsock::socket &listener, const cppsock::socketaddr &addr, int backlog)
 {
     if(listener.is_valid()) return cppsock::utility_error_initialised;
     if(!__is_error(listener.init(addr.get_family(), cppsock::socket_stream, cppsock::ip_protocol_tcp)))
@@ -157,7 +155,7 @@ utility_error_t cppsock::tcp_listener_setup(cppsock::socket &listener, const cpp
     if(listener.is_valid()) listener.close(); // close socket is it was open
     return cppsock::utility_error_fail;
 }
-utility_error_t cppsock::tcp_client_connect(cppsock::socket &client, const cppsock::socketaddr &addr)
+cppsock::utility_error_t cppsock::tcp_client_connect(cppsock::socket &client, const cppsock::socketaddr &addr)
 {
     if(client.is_valid()) return cppsock::utility_error_initialised;
     if(!__is_error(client.init(addr.get_family(), cppsock::socket_stream, cppsock::ip_protocol_tcp)))
@@ -166,7 +164,7 @@ utility_error_t cppsock::tcp_client_connect(cppsock::socket &client, const cppso
     if(client.is_valid()) client.close(); // close socket is it was open
     return cppsock::utility_error_fail;
 }
-utility_error_t cppsock::udp_socket_setup(cppsock::socket &sock, const cppsock::socketaddr &addr)
+cppsock::utility_error_t cppsock::udp_socket_setup(cppsock::socket &sock, const cppsock::socketaddr &addr)
 {
     if(sock.is_valid()) return cppsock::utility_error_initialised;
     if(!__is_error(sock.init(addr.get_family(), cppsock::socket_dgram, cppsock::ip_protocol_udp)))

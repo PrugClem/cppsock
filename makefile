@@ -18,7 +18,8 @@ DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 _OBJ = cppsock_addressinfo.cpp.o \
 	   cppsock_socket.cpp.o \
 	   cppsock_socketaddr.cpp.o \
-	   cppsock_utility.cpp.o 
+	   cppsock_utility.cpp.o \
+	   cppsock_tcp_socket.cpp.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 

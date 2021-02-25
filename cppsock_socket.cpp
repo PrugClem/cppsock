@@ -5,26 +5,24 @@
  */
 #include "cppsock.hpp"
 
-using namespace cppsock;
-
-socket::socket()
+cppsock::socket::socket()
 {
     this->sock = INVALID_SOCKET;
 }
 
-socket::~socket()
+cppsock::socket::~socket()
 {
     this->close();
 }
 
-socket::socket(socket&& other)
+cppsock::socket::socket(socket&& other)
 {
     this->close();
     this->sock = other.sock;
     other.sock = INVALID_SOCKET;
 }
 
-cppsock::socket& socket::operator=(socket &&other)
+cppsock::socket& cppsock::socket::operator=(socket &&other)
 {
     this->close();
     this->sock = other.sock;
@@ -32,13 +30,18 @@ cppsock::socket& socket::operator=(socket &&other)
     return *this;
 }
 
-void socket::swap(socket &other)
+void cppsock::socket::swap(socket &other)
 {
     std::swap(this->sock, other.sock);
 }
 
-error_t socket::init(cppsock::ip_family fam, cppsock::socket_type type, cppsock::ip_protocol protocol)
+error_t cppsock::socket::init(cppsock::ip_family fam, cppsock::socket_type type, cppsock::ip_protocol protocol)
 {
+    if(this->sock != INVALID_SOCKET)
+    {
+        errno = EEXIST;
+        return -1;
+    }
     this->sock = ::socket(fam, type, protocol);
     if( __is_error(this->sock) )
     {
@@ -48,7 +51,7 @@ error_t socket::init(cppsock::ip_family fam, cppsock::socket_type type, cppsock:
     return 0;
 }
 
-error_t socket::bind(const socketaddr &addr)
+error_t cppsock::socket::bind(const socketaddr &addr)
 {
     if( __is_error(::bind(this->sock, addr.data(), sizeof(socketaddr)) ) )
     {
@@ -58,7 +61,7 @@ error_t socket::bind(const socketaddr &addr)
     return 0;
 }
 
-error_t socket::listen(int backlog)
+error_t cppsock::socket::listen(int backlog)
 {
     if( __is_error(::listen(this->sock, backlog) ) )
     {
@@ -68,7 +71,7 @@ error_t socket::listen(int backlog)
     return 0;
 }
 
-error_t socket::accept(socket &other)
+error_t cppsock::socket::accept(socket &other)
 {
     other.sock = ::accept(this->sock, nullptr, nullptr);
     if( __is_error(other.sock) )
@@ -79,7 +82,7 @@ error_t socket::accept(socket &other)
     return 0;
 }
 
-error_t socket::connect(const socketaddr& addr)
+error_t cppsock::socket::connect(const socketaddr& addr)
 {
     if( __is_error(::connect(this->sock, addr.data(), sizeof(socketaddr)) ) )
     {
@@ -89,21 +92,21 @@ error_t socket::connect(const socketaddr& addr)
     return 0;
 }
 
-ssize_t socket::send(const void* buf, size_t size, int flags)
+ssize_t cppsock::socket::send(const void* buf, size_t size, cppsock::msg_flags flags)
 {
     ssize_t ret = ::send(this->sock, (const char*)buf, size, flags); // typecast to const char* is needed because windows
     if( __is_error(ret) ) __set_errno_from_WSA();
     return ret;
 }
 
-ssize_t socket::recv(void* buf, size_t size, int flags)
+ssize_t cppsock::socket::recv(void* buf, size_t size, cppsock::msg_flags flags)
 {
     ssize_t ret = ::recv(this->sock, (char*)buf, size, flags); // typecast to char* is needed because windows
     if( __is_error(ret) ) __set_errno_from_WSA();
     return ret;
 }
 
-ssize_t socket::sendto(const void* buf, size_t size, int flags, const socketaddr* dst)
+ssize_t cppsock::socket::sendto(const void* buf, size_t size, cppsock::msg_flags flags, const socketaddr* dst)
 {
     ssize_t ret = (dst == nullptr) ? ::sendto(this->sock, (const char*)buf, size, flags, nullptr, 0) :               // typecast to const char* is needed because windows
                                      ::sendto(this->sock, (const char*)buf, size, flags, dst->data(), sizeof(*dst)); // typecast to const char* is needed because windows
@@ -111,7 +114,7 @@ ssize_t socket::sendto(const void* buf, size_t size, int flags, const socketaddr
     return ret;
 }
 
-ssize_t socket::recvfrom(void* buf, size_t size, int flags, socketaddr* src)
+ssize_t cppsock::socket::recvfrom(void* buf, size_t size, cppsock::msg_flags flags, socketaddr* src)
 {
     socklen_t socklen = sizeof(*src);
     ssize_t ret = (src == nullptr) ? ::recvfrom(this->sock, (char*)buf, size, flags, nullptr, nullptr) :     // typecast to char* is needed because windows
@@ -120,7 +123,7 @@ ssize_t socket::recvfrom(void* buf, size_t size, int flags, socketaddr* src)
     return ret;
 }
 
-error_t socket::available(size_t &buf)
+error_t cppsock::socket::available(size_t &buf)
 {
     int error = ioctlsocket(this->sock, FIONREAD, (unsigned long*)&buf); // typecast because of windows
     if( __is_error(error) )
@@ -131,7 +134,7 @@ error_t socket::available(size_t &buf)
     return 0;
 }
 
-size_t socket::available()
+size_t cppsock::socket::available()
 {
     size_t rdy = 0;
     if( this->available(rdy) != 0 )
@@ -139,12 +142,12 @@ size_t socket::available()
     return rdy;
 }
 
-bool socket::is_valid() const
+bool cppsock::socket::is_valid() const
 {
     return this->sock != INVALID_SOCKET;
 }
 
-error_t socket::shutdown(int how)
+error_t cppsock::socket::shutdown(socket::shutdown_mode how)
 {
     if( __is_error(::shutdown(this->sock, how)) )
     {
@@ -154,17 +157,7 @@ error_t socket::shutdown(int how)
     return 0;
 }
 
-error_t socket::shutdown(socket::shutdown_mode how)
-{
-    if( __is_error(::shutdown(this->sock, how)) )
-    {
-        __set_errno_from_WSA();
-        return SOCKET_ERROR;
-    }
-    return 0;
-}
-
-error_t socket::close()
+error_t cppsock::socket::close()
 {
     if( __is_error(closesocket(this->sock)) )
     {
@@ -175,12 +168,12 @@ error_t socket::close()
     return 0;
 }
 
-socket_t socket::handle()
+socket_t cppsock::socket::handle()
 {
     return this->sock;
 }
 
-error_t socket::getsockname(socketaddr& addr) const
+error_t cppsock::socket::getsockname(cppsock::socketaddr& addr) const
 {
     socklen_t socklen = sizeof(addr);
     if( __is_error(::getsockname(this->sock, addr.data(), &socklen) ) )
@@ -191,7 +184,7 @@ error_t socket::getsockname(socketaddr& addr) const
     return 0;
 }
 
-error_t socket::getpeername(socketaddr &addr) const
+error_t cppsock::socket::getpeername(cppsock::socketaddr &addr) const
 {
     socklen_t socklen = sizeof(addr);
     if( __is_error(::getpeername(this->sock, addr.data(), &socklen) ) )
@@ -202,21 +195,21 @@ error_t socket::getpeername(socketaddr &addr) const
     return 0;
 }
 
-socketaddr socket::getsockname() const
+cppsock::socketaddr cppsock::socket::getsockname() const
 {
     socketaddr addr;
     this->getsockname(addr);
     return addr;
 }
 
-socketaddr socket::getpeername() const
+cppsock::socketaddr cppsock::socket::getpeername() const
 {
     socketaddr addr;
     this->getpeername(addr);
     return addr;
 }
 
-error_t socket::setsockopt(int optname, const void *opt_val, socklen_t opt_size)
+error_t cppsock::socket::setsockopt(int optname, const void *opt_val, socklen_t opt_size)
 {
     if( __is_error(::setsockopt(this->sock, SOL_SOCKET, optname, (const char*)opt_val, opt_size) ) ) // typecast to const char* is needed because windows
     {
@@ -226,7 +219,7 @@ error_t socket::setsockopt(int optname, const void *opt_val, socklen_t opt_size)
     return 0;
 }
 
-error_t socket::getsockopt(int optname, void *opt_val, socklen_t *opt_size) const
+error_t cppsock::socket::getsockopt(int optname, void *opt_val, socklen_t *opt_size) const
 {
     if ( __is_error(::getsockopt(this->sock, SOL_SOCKET, optname, (char*)opt_val, opt_size) ) ) // typecast to char* is needed because windows
     {
@@ -236,13 +229,13 @@ error_t socket::getsockopt(int optname, void *opt_val, socklen_t *opt_size) cons
     return 0;
 }
 
-error_t socket::set_keepalive(bool keepalive)
+error_t cppsock::socket::set_keepalive(bool keepalive)
 {
     int val = (keepalive) ? 1 : 0;
     return this->setsockopt(SO_KEEPALIVE, &val, sizeof(val));
 }
 
-error_t socket::get_keepalive(bool &keepalive) const
+error_t cppsock::socket::get_keepalive(bool &keepalive) const
 {
     socklen_t len = sizeof(keepalive);
     int boolbuf;
@@ -251,19 +244,19 @@ error_t socket::get_keepalive(bool &keepalive) const
     return ret;
 }
 
-bool socket::get_keepalive() const
+bool cppsock::socket::get_keepalive() const
 {
     bool buf;
     this->get_keepalive(buf);
     return buf;
 }
 
-error_t socket::set_reuseaddr(bool reuseaddr)
+error_t cppsock::socket::set_reuseaddr(bool reuseaddr)
 {
     return this->setsockopt(SO_REUSEADDR, (reuseaddr) ? "1" : "\0", 1);
 }
 
-error_t socket::get_reuseaddr(bool &reuseaddr) const
+error_t cppsock::socket::get_reuseaddr(bool &reuseaddr) const
 {
     socklen_t len = sizeof(reuseaddr);
     int boolbuf;
@@ -272,21 +265,21 @@ error_t socket::get_reuseaddr(bool &reuseaddr) const
     return ret;
 }
 
-bool socket::get_reuseaddr() const
+bool cppsock::socket::get_reuseaddr() const
 {
     bool buf;
     this->get_reuseaddr(buf);
     return buf;
 }
 
-error_t socket::get_socktype(cppsock::socket_type &socktype) const
+error_t cppsock::socket::get_socktype(cppsock::socket_type &socktype) const
 {
     socklen_t len = sizeof(socktype);
     error_t ret = this->getsockopt(SO_TYPE, &socktype, &len);
     return ret;
 }
 
-cppsock::socket_type socket::get_socktype() const
+cppsock::socket_type cppsock::socket::get_socktype() const
 {
     cppsock::socket_type buf;
     this->get_socktype(buf);

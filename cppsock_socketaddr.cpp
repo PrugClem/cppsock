@@ -5,58 +5,56 @@
  */
 #include "cppsock.hpp"
 
-using namespace cppsock;
-
-bool socketaddr::is(cppsock::ip_family family, const std::string &ip)
+bool cppsock::socketaddr::is(cppsock::ip_family family, const std::string &ip)
 {
     sockaddr_storage ss;
     return inet_pton(family, ip.data(), &ss) == 1;
 }
 
-bool socketaddr::is_ipv4(const std::string &ip)
+bool cppsock::socketaddr::is_ipv4(const std::string &ip)
 {
     return is(cppsock::IPv4, ip);
 }
 
-bool socketaddr::is_ipv6(const std::string &ip)
+bool cppsock::socketaddr::is_ipv6(const std::string &ip)
 {
     return is(cppsock::IPv6, ip);
 }
 
-socketaddr::socketaddr()
+cppsock::socketaddr::socketaddr()
 {
     memset(&this->sa, 0, sizeof(this->sa));
 }
-socketaddr::socketaddr(const socketaddr& other)
+cppsock::socketaddr::socketaddr(const socketaddr& other)
 {
     memcpy(&this->sa, &other.sa, sizeof(socketaddr::sa));
 }
-socketaddr::socketaddr(const std::string& addr, uint16_t port)
+cppsock::socketaddr::socketaddr(const std::string& addr, uint16_t port)
 {
     this->set(addr, port);
 }
-socketaddr& socketaddr::operator=(const socketaddr& other)
+cppsock::socketaddr& cppsock::socketaddr::operator=(const socketaddr& other)
 {
     memcpy(&this->sa, &other.sa, sizeof(socketaddr::sa));
     return *this;
 }
 
-sockaddr *socketaddr::data()
+sockaddr *cppsock::socketaddr::data()
 {
     return &this->sa.sa;
 }
-const sockaddr *socketaddr::data() const
+const sockaddr *cppsock::socketaddr::data() const
 {
     return &this->sa.sa;
 }
 
-void socketaddr::set_family(cppsock::ip_family fam)
+void cppsock::socketaddr::set_family(cppsock::ip_family fam)
 {
     memset(&this->sa, 0, sizeof(this->sa));
     this->sa.sa_family = fam;
 }
 
-error_t socketaddr::set_addr(const std::string &ip)
+error_t cppsock::socketaddr::set_addr(const std::string &ip)
 {
     void *addrptr;
     if(this->sa.sa_family == AF_INET)
@@ -75,7 +73,7 @@ error_t socketaddr::set_addr(const std::string &ip)
     return 0;
 }
 
-error_t socketaddr::set_port(uint16_t port)
+error_t cppsock::socketaddr::set_port(uint16_t port)
 {
     in_port_t *portaddr;
     if(this->sa.sa_family == AF_INET)
@@ -94,7 +92,7 @@ error_t socketaddr::set_port(uint16_t port)
     return 0;
 }
 
-error_t socketaddr::set(const std::string& addr, uint16_t port)
+error_t cppsock::socketaddr::set(const std::string& addr, uint16_t port)
 {
     error_t error;
     if( is(cppsock::IPv4, addr) )
@@ -112,7 +110,7 @@ error_t socketaddr::set(const std::string& addr, uint16_t port)
     return 0;
 }
 
-void socketaddr::set(const sockaddr* data)
+void cppsock::socketaddr::set(const sockaddr* data)
 {
     this->set_family(cppsock::IP_unspec);
     if(data->sa_family == AF_INET) // copy IPv4 address structure
@@ -122,13 +120,13 @@ void socketaddr::set(const sockaddr* data)
     return;
 }
 
-void socketaddr::get_family(cppsock::ip_family &fam) const
+void cppsock::socketaddr::get_family(cppsock::ip_family &fam) const
 {
     fam = this->sa.sa_family;
     return;
 }
 
-error_t socketaddr::get_addr(std::string &buf) const
+error_t cppsock::socketaddr::get_addr(std::string &buf) const
 {
     void const *addrptr;
     if(this->sa.sa_family == AF_INET)
@@ -149,7 +147,7 @@ error_t socketaddr::get_addr(std::string &buf) const
     return 0;
 }
 
-error_t socketaddr::get_port(uint16_t &port) const
+error_t cppsock::socketaddr::get_port(uint16_t &port) const
 {
     if(this->sa.sa_family == AF_INET)
     {
@@ -166,19 +164,19 @@ error_t socketaddr::get_port(uint16_t &port) const
     return 0;
 }
 
-cppsock::ip_family socketaddr::get_family() const
+cppsock::ip_family cppsock::socketaddr::get_family() const
 {
     return this->sa.sa_family;
 }
 
-std::string socketaddr::get_addr() const
+std::string cppsock::socketaddr::get_addr() const
 {
     std::string ret;
     this->get_addr(ret);
     return ret;
 }
 
-uint16_t socketaddr::get_port() const
+uint16_t cppsock::socketaddr::get_port() const
 {
     uint16_t ret(0);
     this->get_port(ret);
