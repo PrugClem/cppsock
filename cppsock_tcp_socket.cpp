@@ -18,9 +18,33 @@ cppsock::utility_error_t cppsock::tcp::listener::setup(const char *hostname, uin
     return cppsock::tcp_listener_setup(this->_sock, hostname, port, backlog);
 }
 
+const cppsock::socket &cppsock::tcp::socket::sock()
+{
+    return this->_sock;
+}
+
+cppsock::swap_error cppsock::tcp::socket::swap(cppsock::socket &s)
+{
+    if(s.get_socktype() != cppsock::socket_stream)
+    {
+        return cppsock::swap_error_socktype;
+    }
+    std::swap(this->_sock, s);
+    return cppsock::swap_error_none;
+}
+
 error_t cppsock::tcp::listener::accept(cppsock::tcp::socket &output)
 {
-    return this->_sock.accept(output._sock);
+    error_t err = this->_sock.accept(output._sock);
+    if(err == 0)
+    {
+        error_t err_sockopt = this->_sock.set_keepalive(true);
+        if(err_sockopt < 0)
+        {
+            return cppsock::utility_warning_keepalive;
+        }
+    }
+    return err;
 }
 error_t cppsock::tcp::listener::close()
 {
@@ -44,33 +68,50 @@ const cppsock::socket &cppsock::tcp::socket::sock()
 
 #define CHECK_FLAGS(c, f) ( ( (c) & (f) ) == (f) )
 
-error_t cppsock::tcp::socket::shutdown(std::ios_base::openmode how)
-{
-    if(CHECK_FLAGS(how, std::ios_base::in | std::ios_base::out))
-        return this->_sock.shutdown(cppsock::socket::shutdown_both);
-    if(CHECK_FLAGS(how, std::ios_base::in))
-        return this->_sock.shutdown(cppsock::socket::shutdown_recv);
-    if(CHECK_FLAGS(how, std::ios_base::out))
-        return this->_sock.shutdown(cppsock::socket::shutdown_send);
-    errno = ENOTSUP;
-    return -1;
-}
-
 error_t cppsock::tcp::socket::close()
 {
+    if(this->_sock.shutdown(cppsock::socket::shutdown_both) < 0)
+        errno = 0; // clear error (ignore error on shutdown)
     return this->_sock.close();
 }
 
 cppsock::utility_error_t cppsock::tcp::client::connect(const socketaddr &addr)
 {
-    return cppsock::tcp_client_connect(this->_sock, addr);
+    cppsock::utility_error_t err = cppsock::tcp_client_connect(this->_sock, addr);
+    if(err != cppsock::utility_error_none)
+    {
+        error_t err_sockopt = this->_sock.set_keepalive(true);
+        if(err_sockopt < 0)
+        {
+            return cppsock::utility_warning_keepalive;
+        }
+    }
+    return err;
 }
 
 cppsock::utility_error_t cppsock::tcp::client::connect(const char *hostname, const char *service)
 {
-    return cppsock::tcp_client_connect(this->_sock, hostname, service);
+    cppsock::utility_error_t err = cppsock::tcp_client_connect(this->_sock, hostname, service);
+    if(err != cppsock::utility_error_none)
+    {
+        error_t err_sockopt = this->_sock.set_keepalive(true);
+        if(err_sockopt < 0)
+        {
+            return cppsock::utility_warning_keepalive;
+        }
+    }
+    return err;
 }
 cppsock::utility_error_t cppsock::tcp::client::connect(const char *hostname, uint16_t port)
 {
-    return cppsock::tcp_client_connect(this->_sock, hostname, port);
+    cppsock::utility_error_t err = cppsock::tcp_client_connect(this->_sock, hostname, port);
+    if(err != cppsock::utility_error_none)
+    {
+        error_t err_sockopt = this->_sock.set_keepalive(true);
+        if(err_sockopt < 0)
+        {
+            return cppsock::utility_warning_keepalive;
+        }
+    }
+    return err;
 }
