@@ -18,7 +18,7 @@ cppsock::utility_error_t cppsock::tcp::listener::setup(const char *hostname, uin
     return cppsock::tcp_listener_setup(this->_sock, hostname, port, backlog);
 }
 
-const cppsock::socket &cppsock::tcp::socket::sock()
+const cppsock::socket &cppsock::tcp::listener::sock()
 {
     return this->_sock;
 }

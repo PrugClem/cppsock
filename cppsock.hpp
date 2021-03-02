@@ -807,7 +807,6 @@ namespace cppsock
              */
             cppsock::utility_error_t setup(const char *hostname, uint16_t port, int backlog);
 
-            friend class cppsock::tcp::listener;
             /**
              *  @return the underlying socket instance
              */
