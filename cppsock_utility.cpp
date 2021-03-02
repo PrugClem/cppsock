@@ -194,3 +194,14 @@ const char *cppsock::utility_strerror(utility_error_t code)
         return "unknown error code provided";
     }
 }
+
+const char *cppsock::swap_strerror(swap_error code)
+{
+    switch (code)
+    {
+    case cppsock::swap_error_socktype:
+        return "provided socket has wrong socket type";
+    default:
+        return "unknown error code provided";
+    }
+}

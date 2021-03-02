@@ -700,6 +700,7 @@ namespace cppsock
     utility_error_t udp_socket_setup(socket &sock, const socketaddr &addr);
 
     const char *utility_strerror(utility_error_t code); // convert an utility error code into a human-readable string
+    const char *swap_strerror(swap_error code); // conver a swap error into a human-readable string
 
     // loopback address constants, default is IPv6
     template <uint16_t port, ip_family fam = cppsock::IPv6> const cppsock::socketaddr loopback;
