@@ -1,7 +1,7 @@
 /**
- *  author: Clemens Pruggmayer (PrugClem)
- *  date:   2020-12-22
- *  desc:   implementation for addressinfo, used to resolve hostnames
+ *  @author: Clemens Pruggmayer (PrugClem)
+ *  @date:   2020-12-22
+ *  @desc:   implementation for addressinfo, used to resolve hostnames
  */
 #include "cppsock.hpp"
 

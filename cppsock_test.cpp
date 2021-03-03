@@ -1,7 +1,7 @@
 /**
- *  author: Clemens Pruggmayer (PrugClem)
- *  date:   2020-12-22
- *  desc:   test program to test features for the cppsock library
+ *  @author: Clemens Pruggmayer (PrugClem)
+ *  @date:   2020-12-22
+ *  @desc:   test program to test features for the cppsock library
  */
 #include "cppsock.hpp"
 #include <iostream>
@@ -32,9 +32,21 @@ void check_errno(const char *s_msg)
     }
 }
 
+void init_buf(char *buf, size_t len)
+{
+    for(size_t i=0; i<len; i++)
+    {
+        buf[i] = i & 0xFF;
+    }
+}
+
 int main()
 {
-    cppsock::socket listener, server, client;
+    cppsock::socket sock_listener, sock_server, sock_client;
+    cppsock::tcp::listener tcp_listener;
+    cppsock::tcp::socket tcp_socket;
+    cppsock::tcp::client tcp_client;
+
     const size_t buflen = 256;
     uint64_t byte_test = 0x4142434445464748;
     char sendbuf[buflen], recvbuf[buflen];
@@ -66,61 +78,71 @@ int main()
     check_errno("Error resolving check");
 
     std::cout << "Test 1: Simple TCP connection via loopback, port 10001" << std::endl;
-    cppsock::tcp_listener_setup(listener, nullptr, 10001, 2);                       check_errno("Error setting up TCP server");
-    cppsock::tcp_client_connect(client, nullptr, 10001);                            check_errno("Error connecting to TCP server");
-    listener.accept(server);                                                        check_errno("Error accepting TCP connection");
-    print_details(server, "server-side connection socket");                         check_errno("Error printing server-side connection details");
-    print_details(client, "client-side connection socket");                         check_errno("Error printing client-side connection details");
-    listener.close(); server.close(); client.close(); std::cout << std::endl;       check_errno("Error closing sockets");
+    cppsock::tcp_listener_setup(sock_listener, nullptr, 10001, 2);                              check_errno("Error setting up TCP server");
+    cppsock::tcp_client_connect(sock_client, nullptr, 10001);                                   check_errno("Error connecting to TCP server");
+    sock_listener.accept(sock_server);                                                          check_errno("Error accepting TCP connection");
+    print_details(sock_server, "server-side connection socket");                                check_errno("Error printing server-side connection details");
+    print_details(sock_client, "client-side connection socket");                                check_errno("Error printing client-side connection details");
+    sock_listener.close(); sock_server.close(); sock_client.close(); std::cout << std::endl;    check_errno("Error closing sockets");
 
     std::cout << "Test 2: Simple UDP socket, port 10002" << std::endl;
-    cppsock::udp_socket_setup(server, nullptr, 10002);                              check_errno("Error setting up udp socket 10002");
-    cppsock::udp_socket_setup(client, nullptr, (uint16_t)0);                        check_errno("Error setting up udp socket 0");
-    cppsock::udp_socket_setup(listener, cppsock::loopback<0>);                      check_errno("Error setting up udp socket any");
-    std::cout << "udp socket, port 10002: " << server.getsockname() << std::endl;   check_errno("Error printing udp 10002 sockname");
-    std::cout << "udp socket, port 0: " << client.getsockname() << std::endl;       check_errno("Error printing udp null socket");
-    std::cout << "udp socket any: " << listener.getsockname() << std::endl;         check_errno("Error printing udp any socket");
-    listener.close(); server.close(); client.close(); std::cout << std::endl;       check_errno("Error closing sockets");
+    cppsock::udp_socket_setup(sock_server, nullptr, 10002);                                     check_errno("Error setting up udp socket 10002");
+    cppsock::udp_socket_setup(sock_client, nullptr, (uint16_t)0);                               check_errno("Error setting up udp socket 0");
+    cppsock::udp_socket_setup(sock_listener, cppsock::loopback<0>);                             check_errno("Error setting up udp socket any");
+    std::cout << "udp socket, port 10002: " << sock_server.getsockname() << std::endl;          check_errno("Error printing udp 10002 sockname");
+    std::cout << "udp socket, port 0: " << sock_client.getsockname() << std::endl;              check_errno("Error printing udp null socket");
+    std::cout << "udp socket any: " << sock_listener.getsockname() << std::endl;                check_errno("Error printing udp any socket");
+    sock_listener.close(); sock_server.close(); sock_client.close(); std::cout << std::endl;    check_errno("Error closing sockets");
 
     std::cout << "Test 3: Socket options" << std::endl;
-    cppsock::tcp_listener_setup(listener, nullptr, 10003, 2);                                                                               check_errno("Error setting up TCP server");
-    cppsock::tcp_client_connect(client, nullptr, 10003);                                                                                    check_errno("Error connecting to TCP server");
-    listener.accept(server);                                                                                                                check_errno("Error accepting TCP connection");
-    client.set_keepalive(false);                                                                                                            check_errno("Error while setting client keepalive");
-    std::cout << "client keepalive: " << (client.get_keepalive() ? "true" : "false") << std::endl;                                          check_errno("Error while getting client keepalive");
-    client.set_keepalive(true);                                                                                                             check_errno("Error while setting client keepalive");
-    std::cout << "client keepalive: " << (client.get_keepalive() ? "true" : "false") << std::endl;                                          check_errno("Error while getting client keepalive");
-    std::cout << "client socktype: " << ( (client.get_socktype() == SOCK_STREAM) ? "SOCK_STREAM" : "NOT SOCK_STREAM" ) << std::endl;        check_errno("Error while getting client socktype");
-    std::cout << "listener socktype: " << ( (listener.get_socktype() == SOCK_STREAM) ? "SOCK_STREAM" : "NOT SOCK_STREAM" ) << std::endl;    check_errno("Error while getting listener socktype");
-    listener.close(); server.close(); client.close(); std::cout << std::endl;                                                               check_errno("Error closing sockets");
+    cppsock::tcp_listener_setup(sock_listener, nullptr, 10003, 2);                                                                                  check_errno("Error setting up TCP server");
+    cppsock::tcp_client_connect(sock_client, nullptr, 10003);                                                                                       check_errno("Error connecting to TCP server");
+    sock_listener.accept(sock_server);                                                                                                              check_errno("Error accepting TCP connection");
+    sock_client.set_keepalive(false);                                                                                                               check_errno("Error while setting sock_client keepalive");
+    std::cout << "sock_client keepalive: " << (sock_client.get_keepalive() ? "true" : "false") << std::endl;                                        check_errno("Error while getting sock_client keepalive");
+    sock_client.set_keepalive(true);                                                                                                                check_errno("Error while setting sock_client keepalive");
+    std::cout << "sock_client keepalive: " << (sock_client.get_keepalive() ? "true" : "false") << std::endl;                                        check_errno("Error while getting sock_client keepalive");
+    std::cout << "sock_client socktype: " << ( (sock_client.get_socktype() == SOCK_STREAM) ? "SOCK_STREAM" : "NOT SOCK_STREAM" ) << std::endl;      check_errno("Error while getting sock_client socktype");
+    std::cout << "sock_listener socktype: " << ( (sock_listener.get_socktype() == SOCK_STREAM) ? "SOCK_STREAM" : "NOT SOCK_STREAM" ) << std::endl;  check_errno("Error while getting sock_listener socktype");
+    sock_listener.close(); sock_server.close(); sock_client.close(); std::cout << std::endl;                                                        check_errno("Error closing sockets");
 
     std::cout << "Test 4: sending / recving TCP data" << std::endl;
-    for(size_t i=0; i<buflen; i++)
-    {
-        sendbuf[i] = i & 0xFF;
-        recvbuf[i] = 0;
-    }
-    cppsock::tcp_listener_setup(listener, nullptr, 10004, 2);                   check_errno("Error setting up TCP server");
-    cppsock::tcp_client_connect(client, nullptr, 10004);                        check_errno("Error connecting to TCP server");
-    listener.accept(server);                                                    check_errno("Error accepting TCP connection");
-    client.send(sendbuf, buflen, 0);                                            check_errno("Error sending data");
-    std::cout << "bytes available: " << server.available() << std::endl;        check_errno("Error getting available bytes");
-    server.recv(recvbuf, buflen, 0);                                            check_errno("Error receiving data");
+    init_buf(sendbuf, sizeof(sendbuf));
+    memset(recvbuf, 0, sizeof(recvbuf));
+    cppsock::tcp_listener_setup(sock_listener, nullptr, 10004, 2);                              check_errno("Error setting up TCP server");
+    cppsock::tcp_client_connect(sock_client, nullptr, 10004);                                   check_errno("Error connecting to TCP server");
+    sock_listener.accept(sock_server);                                                          check_errno("Error accepting TCP connection");
+    sock_client.send(sendbuf, buflen, 0);                                                       check_errno("Error sending data");
+    std::cout << "bytes available: " << sock_server.available() << std::endl;                   check_errno("Error getting available bytes");
+    sock_server.recv(recvbuf, buflen, 0);                                                       check_errno("Error receiving data");
     std::cout << "Transfered " << buflen << " bytes of data, " << ((memcmp(sendbuf, recvbuf, buflen) == 0) ? "data is the same" : "data is different") << std::endl;
-    listener.close(); server.close(); client.close(); std::cout << std::endl;   check_errno("Error closing sockets");
-    if(memcmp(sendbuf, recvbuf, buflen) != 0) {print_error("ERROR: Data was received incorrectly"); return 1;}
+    sock_listener.close(); sock_server.close(); sock_client.close(); std::cout << std::endl;    check_errno("Error closing sockets");
+    if(memcmp(sendbuf, recvbuf, buflen) != 0) {print_error("ERROR: Data was received incorrectly"); exit(1);}
 
     std::cout << "Test 5: sending / receiving UDP data" << std::endl;
     memset(recvbuf, 0, sizeof(recvbuf));
     // explicit IPv6
-    cppsock::udp_socket_setup(server, "::", 10005);                             check_errno("Error setting up UDP socket port 10005");
-    cppsock::udp_socket_setup(client, cppsock::any_addr<0, cppsock::IPv6>);     check_errno("Error setting up UDP socket port 0");
-    client.sendto(sendbuf, buflen, 0, &cppsock::loopback<10005, cppsock::IPv6>);check_errno("Error sending data");
-    server.recvfrom(recvbuf, buflen, 0, nullptr);                               check_errno("Error receiving data");
-    server.close(); client.close();                                             check_errno("Error closing sockets");
-    if(memcmp(sendbuf, recvbuf, buflen) != 0) {print_error("ERROR: Data was received incorrectly"); return 1;}
-    else {std::cout << "Data was received correctly" << std::endl;}
+    cppsock::udp_socket_setup(sock_server, "::", 10005);                                check_errno("Error setting up UDP socket port 10005");
+    cppsock::udp_socket_setup(sock_client, cppsock::any_addr<0, cppsock::IPv6>);        check_errno("Error setting up UDP socket port 0");
+    sock_client.sendto(sendbuf, buflen, 0, &cppsock::loopback<10005, cppsock::IPv6>);   check_errno("Error sending data");
+    sock_server.recvfrom(recvbuf, buflen, 0, nullptr);                                  check_errno("Error receiving data");
+    sock_server.close(); sock_client.close();                                           check_errno("Error closing sockets");
+    if(memcmp(sendbuf, recvbuf, buflen) != 0) {print_error("ERROR: Data was received incorrectly"); exit(1);}
+    else {std::cout << "Data was received correctly" << std::endl << std::endl;}
 
+    std::cout << "Test 6: using special socket classes";
+    init_buf(sendbuf, sizeof(sendbuf));
+    memset(recvbuf, 0, sizeof(recvbuf));
+    tcp_listener.setup(cppsock::any_addr<10006>, 1);                                            check_errno("Error setting up TCP listener port 10006");
+    tcp_client.connect(cppsock::loopback<10006>);                                               check_errno("Error connecting to TCP Server port 10006");
+    tcp_listener.accept(tcp_socket);                                                            check_errno("Error accepting TCP connection");
+    tcp_client.send(sendbuf, buflen, 0);                                                        check_errno("Error sending data");
+    std::cout << "bytes available: " << tcp_socket.available() << std::endl;                    check_errno("Error getting available bytes");
+    tcp_socket.recv(recvbuf, buflen, 0);                                                        check_errno("Error receiving data");
+    std::cout << "Transfered " << buflen << " bytes of data, " << ((memcmp(sendbuf, recvbuf, buflen) == 0) ? "data is the same" : "data is different") << std::endl;
+    tcp_listener.close(); tcp_socket.close(); tcp_client.close(); std::cout << std::endl;       check_errno("Error closing sockets");
+
+     // test completed successfully
     std::cout << std::endl  << "=====================================================" << std::endl
                             << "cppsock test completed successfully" << std::endl << std::endl;
 }

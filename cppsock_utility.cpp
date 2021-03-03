@@ -1,7 +1,7 @@
 /**
- *  author: Clemens Pruggmayer (PrugClem)
- *  date:   2020-12-22
- *  desc:   implementation for utility functionality for quicker socket development
+ *  @author: Clemens Pruggmayer (PrugClem)
+ *  @date:   2020-12-22
+ *  @desc:   implementation for utility functionality for quicker socket development
  */
 #include "cppsock.hpp"
 

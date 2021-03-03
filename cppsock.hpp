@@ -1,7 +1,7 @@
 /**
- *  author: Clemens Pruggmayer (PrugClem)
- *  date:   2020-12-22
- *  desc:   main header file for cppsock library, used to define all classes and functions
+ *  @author: Clemens Pruggmayer (PrugClem)
+ *  @date:   2020-12-22
+ *  @desc:   main header file for cppsock library, used to define all classes and functions
  */
 #ifndef CPPSOCK_HPP_INCLUDED
 #define CPPSOCK_HPP_INCLUDED
@@ -470,7 +470,7 @@ namespace cppsock
         error_t available(size_t &buf);
         /**
          *  @brief get the amount of bytes ready to read
-         *  @return the amount of bytes to read; if an error occured, 0 is returned
+         *  @return the amount of bytes to read, if an error occured or no data is ready to be read, 0 is returned
          */
         size_t available();
 
@@ -855,6 +855,17 @@ namespace cppsock
              *  @return 0 if the connection has been closed, smaller than 0 if an error occured, the amount of bytes received otherwise
              */
             std::streamsize recv(void *data, std::streamsize max_len, cppsock::msg_flags flags);
+            /**
+             *  @brief get the amount of bytes ready to read
+             *  @param buf reference to a buffer where the amount should be written into
+             *  @return 0 if everything went right; anything smaller than 0 indicates an error and errno is set appropriately
+             */
+            error_t available(size_t &buf);
+            /**
+             *  @brief get the amount of bytes ready to read
+             *  @return the amount of bytes to read, if an error occured or no data is ready to be read, 0 is returned
+             */
+            size_t available();
 
             friend class cppsock::tcp::listener;
             /**
@@ -877,6 +888,7 @@ namespace cppsock
 
         class client : public cppsock::tcp::socket
         {
+        public:
             /**
              *  @brief connects this tcp socket to a server
              *  @param addr the server's IP address

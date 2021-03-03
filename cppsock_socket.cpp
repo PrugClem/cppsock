@@ -1,7 +1,7 @@
 /**
- *  author: Clemens Pruggmayer (PrugClem)
- *  date:   2020-12-22
- *  desc:   implementation for sockets, used to send/transmit data
+ *  @author: Clemens Pruggmayer (PrugClem)
+ *  @date:   2020-12-22
+ *  @desc:   implementation for sockets, used to send/transmit data
  */
 #include "cppsock.hpp"
 
