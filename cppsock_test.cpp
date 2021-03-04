@@ -46,6 +46,7 @@ int main()
     cppsock::tcp::listener tcp_listener;
     cppsock::tcp::socket tcp_socket;
     cppsock::tcp::client tcp_client;
+    cppsock::udp::socket udp_sock1, udp_sock2;
 
     const size_t buflen = 256;
     uint64_t byte_test = 0x4142434445464748;
@@ -130,7 +131,7 @@ int main()
     if(memcmp(sendbuf, recvbuf, buflen) != 0) {print_error("ERROR: Data was received incorrectly"); exit(1);}
     else {std::cout << "Data was received correctly" << std::endl << std::endl;}
 
-    std::cout << "Test 6: using special socket classes";
+    std::cout << "Test 6: using special tcp socket classes" << std::endl;
     init_buf(sendbuf, sizeof(sendbuf));
     memset(recvbuf, 0, sizeof(recvbuf));
     tcp_listener.setup(cppsock::any_addr<10006>, 1);                                            check_errno("Error setting up TCP listener port 10006");
@@ -141,6 +142,17 @@ int main()
     tcp_socket.recv(recvbuf, buflen, 0);                                                        check_errno("Error receiving data");
     std::cout << "Transfered " << buflen << " bytes of data, " << ((memcmp(sendbuf, recvbuf, buflen) == 0) ? "data is the same" : "data is different") << std::endl;
     tcp_listener.close(); tcp_socket.close(); tcp_client.close(); std::cout << std::endl;       check_errno("Error closing sockets");
+
+    std::cout << "Test 7: using special udp sockets" << std::endl;
+    init_buf(sendbuf, sizeof(sendbuf));
+    memset(recvbuf, 0, sizeof(recvbuf));
+    udp_sock1.setup(cppsock::any_addr<10007>);                          check_errno("Error setting up UDP socket [::]:10007");
+    udp_sock2.setup(cppsock::any_addr<0>);                              check_errno("Error setting up UDP socket [::]:0");
+    udp_sock2.sendto(sendbuf, buflen, 0, &cppsock::loopback<10007>);    check_errno("Error sending data");
+    udp_sock1.recvfrom(recvbuf, buflen, 0, nullptr);                    check_errno("Error receiving data");
+    udp_sock1.close(); udp_sock2.close();                               check_errno("Error closing sockets");
+    if(memcmp(sendbuf, recvbuf, buflen) != 0) {print_error("ERROR: Data was received incorrectly"); exit(1);}
+    else {std::cout << "Data was received correctly" << std::endl << std::endl;}
 
      // test completed successfully
     std::cout << std::endl  << "=====================================================" << std::endl

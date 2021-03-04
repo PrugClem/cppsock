@@ -39,8 +39,6 @@ const cppsock::socket &cppsock::tcp::socket::sock()
     return this->_sock;
 }
 
-#define CHECK_FLAGS(c, f) ( ( (c) & (f) ) == (f) )
-
 error_t cppsock::tcp::socket::close()
 {
     if(this->_sock.shutdown(cppsock::socket::shutdown_both) < 0)
