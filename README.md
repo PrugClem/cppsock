@@ -1,14 +1,9 @@
 # cppsock
-a low-level implementation for POSIX sockets in C++ for windows and linux
+a simple, low-level, header-only implementation for POSIX sockets in C++ tested under windows and linux
 
-## building
-1. clone this repository
-2. * For Windows: run ``build_win.bat`` as it currently is the best way to build for windows
-   * For Cygwin and Linux: run ``make full`` to build the library
-3. The header file is ``cppsock.hpp`` and the library file is ``out/libcppsock.a``
-   To verify functionality, run ```cppsock_test``` (linux) or ```cppsock_test.exe``` (windows) to run the test program. The test program should output something like this at the end to indicate successful execution:
+## using the library
+***Please note that this library has recently been under reconstruction so issues  on the latest versions of the dev brnach may occur***
 
-       =================================================
-       cppsock test completed successfully
+To use the library, include the ``cppsock.hpp``. In windows, it is required to link the winsock library. this can be done by adding ``-lws2_32`` to the linker arguments
 
-   Please note that you need the WSA library in Windows. This can be done by linking the library ``-lws2_32`` (provided by windows) to the final program
+    Please note that you need the WSA library in Windows. This can be done by linking the library ``-lws2_32`` (provided by windows) to the final program
