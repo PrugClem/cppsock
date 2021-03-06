@@ -339,8 +339,14 @@ namespace cppsock
     {
         switch (code)
         {
+        case cppsock::swap_error_none:
+            return "Swap was successful";
         case cppsock::swap_error_socktype:
             return "provided socket has wrong socket type";
+        case cppsock::swap_error_listening:
+            return "provided socket for stream socket is listening";
+        case cppsock::swap_error_not_listening:
+            return "provided socket for listener socket is not listening";
         default:
             return "unknown error code provided";
         }

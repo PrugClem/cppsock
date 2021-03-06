@@ -67,16 +67,29 @@ namespace cppsock
             }
             /**
              *  @brief tries to swap a cppsock::socket into this instance
+             *  @param s socket that should be swapped into this instance, can be invalid
              *  @return 0 if the sockets could be swapped,
              *          anything smaller than zero indicates an error, the socket are not swapped and errno is set appropriately
              */
             cppsock::swap_error swap(cppsock::socket &s)
             {
-                if(s.get_socktype() != cppsock::socket_stream)
+                int val = 0;
+                socklen_t len = sizeof(val);
+
+                if(s.is_valid())
                 {
-                    return cppsock::swap_error_socktype;
+                    if((s.getsockopt(SO_ACCEPTCONN, &val, &len) != 0) || (val == 0))
+                    {
+                        errno = 0;
+                        return cppsock::swap_error_not_listening;
+                    }
+                    if(s.get_socktype() != cppsock::socket_stream)
+                    {
+                        return cppsock::swap_error_socktype;
+                    }
                 }
                 std::swap(this->_sock, s);
+                errno = 0;
                 return cppsock::swap_error_none;
             }
 

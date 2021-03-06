@@ -57,8 +57,10 @@ namespace cppsock
      */
     enum swap_error : error_t
     {
-        swap_error_none = 0,        // swap completed successfully
-        swap_error_socktype = -1    // swap failed: wrong socktype
+        swap_error_none = 0,            // swap completed successfully
+        swap_error_socktype = -1,       // swap failed: wrong socktype
+        swap_error_listening = -2,      // swap failed: socket is currently listening
+        swap_error_not_listening = -3   // swap failed: socket is currently not listening
     };
 
     using msg_flags = int;   // type for message flags
