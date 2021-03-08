@@ -37,7 +37,7 @@ void check_errno(const char *s_msg, const char *add_msg = nullptr)
     {
         print_error(s_msg);
         if(add_msg != nullptr) printf("Additional message: %s\n", add_msg);
-        abort(nullptr);
+        abort("Errno check failed");
     }
 }
 
