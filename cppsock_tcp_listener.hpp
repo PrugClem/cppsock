@@ -80,7 +80,6 @@ namespace cppsock
                 {
                     if((s.getsockopt(SO_ACCEPTCONN, &val, &len) != 0) || (val == 0))
                     {
-                        errno = 0;
                         return cppsock::swap_error_not_listening;
                     }
                     if(s.get_socktype() != cppsock::socket_stream)
