@@ -23,8 +23,9 @@ void print_details(const cppsock::socket &s, const std::string& id)
 
 void abort(const char *a_msg, const char *add_msg = nullptr)
 {
-    if(a_msg) printf("Aborting: %s\n", a_msg);
-    if(add_msg) printf("Additional message: %s\n", add_msg);
+    if(a_msg != nullptr) printf("Aborting: %s\n", a_msg);
+    if(add_msg != nullptr) printf("Additional message: %s\n", add_msg);
+    std::cout << "Aborting..." << std::endl;
     std::cout << "=====================================================" << std::endl;
     std::cout << "cppsock test failed" << std::endl << std::endl;
     exit(EXIT_FAILURE);
@@ -35,7 +36,7 @@ void check_errno(const char *s_msg, const char *add_msg = nullptr)
     if(errno != 0)
     {
         print_error(s_msg);
-        if(add_msg) printf("Additional message: %s\n", add_msg);
+        if(add_msg != nullptr) printf("Additional message: %s\n", add_msg);
         abort(nullptr);
     }
 }
