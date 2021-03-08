@@ -69,7 +69,7 @@ namespace cppsock
              *  @brief tries to swap a cppsock::socket into this instance
              *  @param s socket that should be swapped into this instance, can be invalid
              *  @return 0 if the sockets could be swapped,
-             *          anything smaller than zero indicates an error, the socket are not swapped and errno is set appropriately
+             *          anything smaller than zero indicates an error, the socket are not swapped and errno may be set appropriately
              */
             cppsock::swap_error swap(cppsock::socket &s)
             {

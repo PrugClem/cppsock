@@ -197,11 +197,11 @@ int main()
     if((swap_err = tcp_socket.swap(sock_listener)) == cppsock::swap_error_none) abort("swap tcp sock <-> listener succeeded", cppsock::swap_strerror(swap_err));
     if((swap_err = tcp_listener.swap(sock_server)) == cppsock::swap_error_none) abort("Swap listener <-> tcp sock succeeded", cppsock::swap_strerror(swap_err));
     if((swap_err = udp_sock1.swap(sock_client))    == cppsock::swap_error_none) abort("Swap udp sock <-> tcp sock succeeded", cppsock::swap_strerror(swap_err));
-    sock_listener.close(); sock_client.close(); sock_server.close();            check_errno("Error closing tcp sockets");
+    errno=0; sock_listener.close(); sock_client.close(); sock_server.close();   check_errno("Error closing tcp sockets");
                                                                                 std::cout << "Swapping tests 4" << std::endl;
     cppsock::udp_socket_setup(sock_client, cppsock::any_addr<10009>);           check_errno("Error setting up UDP socket [::]:10009");
     if((swap_err = tcp_socket.swap(sock_client))   == cppsock::swap_error_none) abort("swap tcp sock <-> udp sock succeeded", cppsock::swap_strerror(swap_err));
-    sock_client.close();                                                        check_errno("Error closing udp socket");
+    errno=0; sock_client.close();                                               check_errno("Error closing udp socket");
 
      // test completed successfully
     std::cout << std::endl  << "=====================================================" << std::endl
