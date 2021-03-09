@@ -1,4 +1,13 @@
-/**/
+/**
+ * @file cppsock_tcp_listener.hpp
+ * @author PrugClem
+ * @brief implementation for cppsock tcp listener sockets
+ * @version 0.1
+ * @date 2021-03-09
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #include "cppsock.hpp"
 #ifndef CPPSOCK_HPP_INCLUDED
 #error this file is included by in cppsock.hpp
