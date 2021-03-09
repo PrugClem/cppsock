@@ -2,7 +2,6 @@
 a simple, low-level, header-only implementation for POSIX sockets in C++ tested under windows and linux
 
 ## using the library
-***Please note that this library has recently been under reconstruction so issues  on the latest versions of the dev brnach may occur***
 
 To use the library, include the ``cppsock.hpp``. In windows, it is required to link the winsock library. this can be done by adding ``-lws2_32`` to the linker arguments
 
