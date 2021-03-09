@@ -9,9 +9,6 @@
  * 
  */
 #include "cppsock.hpp"
-#ifndef CPPSOCK_HPP_INCLUDED
-#error this file is included by in cppsock.hpp
-#endif
 
 #ifndef CPPSOCK_TYPES_HPP_INCLUDED
 #define CPPSOCK_TYPES_HPP_INCLUDED
