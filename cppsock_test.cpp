@@ -61,18 +61,35 @@ int main()
 
     const size_t buflen = 256;
     uint64_t byte_test = 0x4142434445464748;
+    float float_test = 1.12345;
+    double double_test = 1.12345;
     char sendbuf[buflen], recvbuf[buflen];
 
     std::cout << "This machine's hostname: \"" << cppsock::hostname() << "\"" << std::endl;
 
+    // ntoh and hton test with uint64_t
     std::cout << "byte_test: " << std::hex << byte_test << std::endl;
     std::cout << "cppsock::hton<uint64_t>(byte_test): " << cppsock::hton<uint64_t>(byte_test) << std::endl;
     std::cout << "cppsock::ntoh<uint64_t>(cppsock::hton<uint64_t>(byte_test)): " << cppsock::ntoh<uint64_t>(cppsock::hton<uint64_t>(byte_test)) << std::endl;
     if( byte_test != cppsock::ntoh<uint64_t>(cppsock::hton<uint64_t>(byte_test)) )
     {
-        std::cerr << "error: mistake in hton or ntoh" << std::endl;
+        abort("error: mistake in hton<uint64_t> or ntoh<uint64_t>");
     }
     std::cout << std::dec << std::endl;
+    // ntoh and hton test with float
+    std::cout << "float_test:" << float_test << std::endl;
+    std::cout << "cppsock::ntoh<float>(cppsock::hton<float>(float_test)): " << cppsock::ntoh<float>(cppsock::hton<float>(float_test)) << std::endl;
+    if(float_test != cppsock::ntoh<float>(cppsock::hton<float>(float_test)) )
+    {
+        abort("error: mistake in hton<float> or ntoh<float>");
+    }
+    // ntoh and hton test with double
+    std::cout << "double_test: " << double_test << std::endl;
+    std::cout << "cppsock::ntoh<double>(cppsock::hton<double>(double_test))" << cppsock::ntoh<double>(cppsock::hton<double>(double_test)) << std::endl;
+    if(double_test != cppsock::ntoh<double>(cppsock::hton<double>(double_test)) )
+    {
+        abort("error: mistake in hton<double> or ntoh<double>");
+    }
 
     errno = 0;
     std::cout << "Test 0: resolving passive loopback addresses" << std::endl;

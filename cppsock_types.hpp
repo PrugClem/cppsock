@@ -99,6 +99,13 @@ namespace cppsock
     template<uint16_t port> const cppsock::socketaddr any_addr<port, cppsock::IPv4> = cppsock::socketaddr("0.0.0.0", port);
     template<uint16_t port> const cppsock::socketaddr any_addr<port, cppsock::IPv6> = cppsock::socketaddr("::", port);
 
+    template<typename Tout, typename Tin> Tout binary_cast(Tin in)
+    {
+        static_assert(sizeof(Tin) == sizeof(Tout),
+            "Binary Cast only works with types of the same length");
+        return * ( (Tout*) (&in) );
+    }
+
     /**
      *  @brief converts a number from host byte order to network byte order.
      *  You should only use this function is absolutley necessary since thin function does not convert using library functions
@@ -150,6 +157,14 @@ namespace cppsock
      */
     template<> inline uint32_t hton<uint32_t>(uint32_t in) {return htonl(in);}
     /**
+     * @brief converts a float from host yte order to network byte order
+     */
+    template<> inline float    hton<float>   (float    in) {return binary_cast<float> (hton<uint32_t>( binary_cast<uint32_t>(in) ));}
+    /**
+     * @brief converts a double from host yte order to network byte order
+     */
+    template<> inline double   hton<double>  (double   in) {return binary_cast<double>(hton<uint64_t>( binary_cast<uint64_t>(in) ));}
+    /**
      *  @brief converts a 2-byte number from network byte order to host byte order
      */
     template<> inline uint16_t ntoh<uint16_t>(uint16_t in) {return ntohs(in);}
@@ -157,6 +172,14 @@ namespace cppsock
      *  @brief converts a 4-byte number from network byte order to host byte order
      */
     template<> inline uint32_t ntoh<uint32_t>(uint32_t in) {return ntohl(in);}
+    /**
+     *  @brief converts a float from network byte order to host byte order
+     */
+    template<> inline float    ntoh<float>   (float    in) {return binary_cast<float> (hton<uint32_t>(binary_cast<uint32_t>(in) ));}
+    /**
+     *  @brief converts a double from network byte order to host byte order
+     */
+    template<> inline double   ntoh<double>  (double   in) {return binary_cast<double>(hton<uint64_t>(binary_cast<uint64_t>(in) ));}
 } // namespace cppsock
 
 #endif // CPPSOCK_TYPES_HPP_INCLUDED

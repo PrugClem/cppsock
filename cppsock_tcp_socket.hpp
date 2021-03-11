@@ -114,7 +114,7 @@ namespace cppsock
                 return this->_sock.close();
             }
 
-        };
+        }; // class socket
     } // namespace tcp
 } // namespace cppsock
 
