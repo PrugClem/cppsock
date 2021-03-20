@@ -13,7 +13,6 @@
 #define CPPSOCK_HPP_INCLUDED
 
 // std include files
-#include <condition_variable>
 #include <functional>
 #include <iostream>
 #include <string.h>
@@ -22,9 +21,17 @@
 #include <memory>
 #include <cerrno>
 #include <string>
-#include <thread>
 #include <vector>
 #include <map>
+
+// mingw-compatiblity
+#ifdef CPPSOCK_MINGW_IMPLEMENTATION
+    #include <mingw.stdthread.h>
+    #include <mingw.condition_variable.h>
+#else
+    #include <thread>
+    #include <condition_variable>
+#endif
 
 #if defined __linux__ || defined __CYGWIN__
 

@@ -300,7 +300,12 @@ namespace cppsock
             return memcmp(&this->sa, &other.sa, sizeof(this->sa)) < 0;
         }
 
-    };
+    }; // class socketaddr
+    struct socketaddr_pair
+    {
+        cppsock::socketaddr local, remote;
+    }; // struct socketaddr_pair
+    //using socketaddr_pair = std::pair<cppsock::socketaddr, cppsock::socketaddr>;
 } // namespace cppsock
 
 #endif // CPPSOCK_SOCKETADDR_HPP_INCLUDED

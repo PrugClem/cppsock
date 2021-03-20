@@ -10,6 +10,7 @@
  */
 #include "cppsock.hpp"
 
+
 #ifndef CPPSOCK_TCP_SOCKET_HPP_INCLUDED
 #define CPPSOCK_TCP_SOCKET_HPP_INCLUDED
 
@@ -23,6 +24,11 @@ namespace cppsock
         protected:
             cppsock::socket _sock;
         public:
+            socket() : _sock() { }
+            socket(socket &&other)
+            {
+                this->_sock = std::move(other._sock);
+            }
             virtual ~socket()
             {
                 this->close();
@@ -107,6 +113,10 @@ namespace cppsock
                 return cppsock::swap_error_none;
             }
 
+            error_t shutdown(cppsock::shutdown_mode how)
+            {
+                return this->_sock.shutdown(how);
+            }
             /**
              *  @brief terminates the connection, closes and invalidates the socket
              *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately

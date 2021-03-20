@@ -9,7 +9,8 @@
 
 void print_error(const char* msg)
 {
-    perror(msg);
+    //perror(msg);
+    printf("%s: %s\n", msg, strerror(errno));
     fflush(stderr);
     errno = 0;
 }
@@ -51,28 +52,51 @@ void init_buf(char *buf, size_t len)
 
 void test_collection(uint16_t port)
 {
+    std::mutex stdoutmtx;
+    std::vector<cppsock::tcp::client> clients;
     cppsock::tcp::socket_collection collection (
-            [](std::shared_ptr<cppsock::tcp::socket> sock, void** pers)
-            {
-                std::cout << "connected " << sock->sock().getpeername() << std::endl;
+            [&stdoutmtx](std::shared_ptr<cppsock::tcp::socket> sock, cppsock::socketaddr_pair addr, void** pers)
+            {   std::lock_guard<std::mutex> lock(stdoutmtx);
+                std::cout << "[callback] connected " << addr.remote << std::endl;
             },
-            [](std::shared_ptr<cppsock::tcp::socket> sock, void** pers)
-            {
+            [&stdoutmtx](std::shared_ptr<cppsock::tcp::socket> sock, cppsock::socketaddr_pair addr, void** pers)
+            {   std::lock_guard<std::mutex> lock(stdoutmtx);
                 char buf[16];
                 sock->recv(buf, sizeof(buf), 0);
-                std::cout << "echoing to " << sock->sock().getpeername() << ": " << buf << std::endl;
+                std::cout << "[callback] echoing to " << addr.remote << ": " << buf << std::endl;
                 sock->send(buf, strlen(buf)+1, 0);
             },
-            [](std::shared_ptr<cppsock::tcp::socket> sock, void** pers)
-            {
-                std::cout << "disconnected: " << sock->sock().getpeername() << std::endl;
+            [&stdoutmtx](std::shared_ptr<cppsock::tcp::socket> sock, cppsock::socketaddr_pair addr, void** pers)
+            {   std::lock_guard<std::mutex> lock(stdoutmtx);
+                std::cout << "[callback] disconnected " << addr.remote << std::endl;
             } 
         );
     cppsock::tcp::server server(&collection);
     server.start(nullptr, port, 2);
     std::cout << "started server" << std::endl;
+    clients.resize(6);
+    for(cppsock::tcp::client &client : clients)
+    {
+        client.connect(nullptr, port);
+        std::lock_guard<std::mutex> lock(stdoutmtx);
+        std::cout << "connected: " << client.sock().getpeername() << std::endl;
+    }
+    for(cppsock::tcp::client& client : clients)
+    {
+        client.send("Hello", 6, 0);
+    }
+    for(size_t i=0; i<clients.size()/2; i++) // close half sockets from the client side
+    {
+        cppsock::tcp::client &client = clients.at(i);
+        client.shutdown(cppsock::shutdown_both);
+    }
     server.stop();
-    std::cout << "stopped server" << std::endl;
+    stdoutmtx.lock();
+        std::cout << "stopped server" << std::endl;
+        std::cout << "collection content: " << collection.count() << " connections" << std::endl;
+    stdoutmtx.unlock();
+    collection.clear();
+    std::cout << "cleared collection" << std::endl;
 }
 
 int main()
