@@ -127,8 +127,10 @@ namespace cppsock
              */
             error_t close()
             {
-                this->_sock.shutdown(cppsock::shutdown_both);
-                return this->_sock.close();
+                if(this->_sock.shutdown(cppsock::shutdown_both) < 0)
+                    errno = 0; // clear error (ignore error on shutdown)
+                error_t err = this->_sock.close();
+                return err;
             }
         };
     } // namespace tcp
