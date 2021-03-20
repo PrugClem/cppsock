@@ -9,11 +9,6 @@
  * 
  */
 #include "cppsock.hpp"
-#ifndef CPPSOCK_HPP_INCLUDED
-#error this file is included by in cppsock.hpp
-#endif
-
-#include "cppsock_types.hpp"
 
 #ifndef CPPSOCK_TCP_SOCKET_HPP_INCLUDED
 #define CPPSOCK_TCP_SOCKET_HPP_INCLUDED
@@ -28,6 +23,15 @@ namespace cppsock
         protected:
             cppsock::socket _sock;
         public:
+            virtual ~socket()
+            {
+                this->close();
+            }
+            
+            void swap(cppsock::tcp::socket &other)
+            {
+                std::swap(this->_sock, other._sock);
+            }
             /**
              *  @brief sends data over this tcp connection
              *  @param data pointer to the start of the data array

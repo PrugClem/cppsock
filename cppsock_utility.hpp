@@ -10,8 +10,6 @@
  */
 #include "cppsock.hpp"
 
-#include "cppsock_types.hpp"
-
 #ifndef CPPSOCK_UTILITY_HPP_INCLUDED
 #define CPPSOCK_UTILITY_HPP_INCLUDED
 

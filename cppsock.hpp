@@ -13,12 +13,18 @@
 #define CPPSOCK_HPP_INCLUDED
 
 // std include files
+#include <condition_variable>
+#include <functional>
 #include <iostream>
 #include <string.h>
 #include <sstream>
+#include <atomic>
+#include <memory>
 #include <cerrno>
 #include <string>
+#include <thread>
 #include <vector>
+#include <map>
 
 #if defined __linux__ || defined __CYGWIN__
 
@@ -88,6 +94,8 @@ public:
 };
 inline __wsa_loader_class __wsa_loader_instance;
 
+#pragma comment(lib, "ws2_32.lib")
+
 #else // else if defined _WIN32
 #error unsupported OS used
 #endif
@@ -101,5 +109,7 @@ inline __wsa_loader_class __wsa_loader_instance;
 #include "cppsock_tcp_listener.hpp"
 #include "cppsock_tcp_client.hpp"
 #include "cppsock_udp_socket.hpp"
+#include "cppsock_tcp_socket_collection.hpp"
+#include "cppsock_tcp_server.hpp"
 
 #endif // CPPSOCK_HPP_INCLUDED

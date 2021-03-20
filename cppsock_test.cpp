@@ -49,6 +49,32 @@ void init_buf(char *buf, size_t len)
     }
 }
 
+void test_collection(uint16_t port)
+{
+    cppsock::tcp::socket_collection collection (
+            [](std::shared_ptr<cppsock::tcp::socket> sock, void** pers)
+            {
+                std::cout << "connected " << sock->sock().getpeername() << std::endl;
+            },
+            [](std::shared_ptr<cppsock::tcp::socket> sock, void** pers)
+            {
+                char buf[16];
+                sock->recv(buf, sizeof(buf), 0);
+                std::cout << "echoing to " << sock->sock().getpeername() << ": " << buf << std::endl;
+                sock->send(buf, strlen(buf)+1, 0);
+            },
+            [](std::shared_ptr<cppsock::tcp::socket> sock, void** pers)
+            {
+                std::cout << "disconnected: " << sock->sock().getpeername() << std::endl;
+            } 
+        );
+    cppsock::tcp::server server(&collection);
+    server.start(nullptr, port, 2);
+    std::cout << "started server" << std::endl;
+    server.stop();
+    std::cout << "stopped server" << std::endl;
+}
+
 int main()
 {
     cppsock::socket sock_listener, sock_server, sock_client;
@@ -218,9 +244,13 @@ int main()
                                                                                 std::cout << "Swapping tests 4" << std::endl;
     cppsock::udp_socket_setup(sock_client, cppsock::any_addr<10009>);           check_errno("Error setting up UDP socket [::]:10009");
     if((swap_err = tcp_socket.swap(sock_client))   == cppsock::swap_error_none) abort("swap tcp sock <-> udp sock succeeded", cppsock::swap_strerror(swap_err));
-    errno=0; sock_client.close();                                               check_errno("Error closing udp socket");
+    errno=0; sock_client.close(); std::cout << std::endl;                       check_errno("Error closing udp socket");
+
+    std::cout << "Test 10: using tcp handled server" << std::endl;
+    test_collection(10010);
+    std::cout << std::endl;
 
      // test completed successfully
-    std::cout << std::endl  << "=====================================================" << std::endl
-                            << "cppsock test completed successfully" << std::endl << std::endl;
+    std::cout   << "=====================================================" << std::endl
+                << "cppsock test completed successfully" << std::endl << std::endl;
 }

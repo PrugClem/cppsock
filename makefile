@@ -12,7 +12,7 @@ full:
 	make test
 
 test:
-	g++ -o cppsock_test \
+	g++ -pthread -o cppsock_test \
 		cppsock_test.cpp
 
 clear:

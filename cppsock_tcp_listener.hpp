@@ -8,12 +8,8 @@
  * @copyright Copyright (c) 2021
  * 
  */
-#include "cppsock.hpp"
-#ifndef CPPSOCK_HPP_INCLUDED
-#error this file is included by in cppsock.hpp
-#endif
 
-#include "cppsock_types.hpp"
+#include "cppsock.hpp"
 
 #ifndef CPPSOCK_TCP_LISTENER_HPP_INCLUDED
 #define CPPSOCK_TCP_LISTENER_HPP_INCLUDED
@@ -28,6 +24,10 @@ namespace cppsock
         protected:
             cppsock::socket _sock;
         public:
+            virtual ~listener()
+            {
+                this->close();
+            }
             /**
              *  @brief sets up a tcp listener socket
              *  @param addr the address the listener should listen to
@@ -127,6 +127,7 @@ namespace cppsock
              */
             error_t close()
             {
+                this->_sock.shutdown(cppsock::shutdown_both);
                 return this->_sock.close();
             }
         };

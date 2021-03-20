@@ -8,10 +8,7 @@
  * @copyright Copyright (c) 2021
  * 
  */
-
 #include "cppsock.hpp"
-
-#include "cppsock_types.hpp"
 
 #ifndef CPPSOCK_SOCKETADDR_HPP_INCLUDED
 #define CPPSOCK_SOCKETADDR_HPP_INCLUDED
