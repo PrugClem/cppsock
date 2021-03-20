@@ -10,8 +10,7 @@
  */
 #include "cppsock.hpp"
 
-#ifndef CPPSOCK_UTILITY_HPP_INCLUDED
-#define CPPSOCK_UTILITY_HPP_INCLUDED
+#pragma once
 
 namespace cppsock
 {
@@ -356,5 +355,3 @@ namespace cppsock
         }
     }
 } // namespace cppsock
-
-#endif // CPPSOCK_UTILITY_HPP_INCLUDED

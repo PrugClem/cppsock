@@ -10,9 +10,7 @@
  */
 #include "cppsock.hpp"
 
-
-#ifndef CPPSOCK_TCP_SOCKET_HPP_INCLUDED
-#define CPPSOCK_TCP_SOCKET_HPP_INCLUDED
+#pragma once
 
 namespace cppsock
 {
@@ -131,5 +129,3 @@ namespace cppsock
         }; // class socket
     } // namespace tcp
 } // namespace cppsock
-
-#endif // CPPSOCK_TCP_SOCKET_HPP_INCLUDED

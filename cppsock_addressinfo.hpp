@@ -10,8 +10,7 @@
  */
 #include "cppsock.hpp"
 
-#ifndef CPPSOCK_ADDRESSINFO_HPP_INCLUDED
-#define CPPSOCK_ADDRESSINFO_HPP_INCLUDED
+#pragma once
 
 namespace cppsock
 {
@@ -125,5 +124,3 @@ namespace cppsock
         }
     };
 }; // namespace cppsock
-
-#endif // CPPSOCK_ADDRESSINFO_HPP_INCLUDED

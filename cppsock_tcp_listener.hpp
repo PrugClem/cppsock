@@ -11,8 +11,7 @@
 
 #include "cppsock.hpp"
 
-#ifndef CPPSOCK_TCP_LISTENER_HPP_INCLUDED
-#define CPPSOCK_TCP_LISTENER_HPP_INCLUDED
+#pragma once
 
 namespace cppsock
 {
@@ -135,5 +134,3 @@ namespace cppsock
         };
     } // namespace tcp
 } // namespace cppsock
-
-#endif // CPPSOCK_TCP_LISTENER_HPP_INCLUDED

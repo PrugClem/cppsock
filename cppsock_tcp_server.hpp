@@ -10,8 +10,7 @@
  */
 #include "cppsock.hpp"
 
-#ifndef CPPSOCK_TCP_SERVER_HPP_INCLUDED
-#define CPPSOCK_TCP_SERVER_HPP_INCLUDED
+#pragma once
 
 namespace cppsock
 {
@@ -50,7 +49,16 @@ namespace cppsock
                 this->stop();
             }
 
-            cppsock::utility_error_t start(const cppsock::addressinfo &addr, int backlog)
+            /**
+             *  @brief starts the tcp handled server, a valid socket collection must be linked with this instance
+             * 
+             *  @param addr the address the listener should listen to
+             *  @param backlog how many unestablished connections the OS should store, can be changed
+             *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror(), 
+             *          a code of smaller than zero indicates an error and errno is set to the last error
+             *          a code of greater than zero indicates a warning and errno is set to the last warning
+             */
+            cppsock::utility_error_t start(const cppsock::socketaddr &addr, int backlog = 5)
             {
                 if(this->_collection == nullptr) return cppsock::utility_error_fail;
                 cppsock::utility_error_t error = this->_listener.setup(addr, backlog);
@@ -59,8 +67,17 @@ namespace cppsock
                 _listener_running = true;
                 return error;
             }
-            
-            cppsock::utility_error_t start(const char *hostname, const char *service, int backlog)
+            /**
+             *  @brief starts the tcp handled server, a valid socket collection must be linked with this instance
+             * 
+             *  @param hostname the ip address the listener should listen to
+             *  @param service the service name / port number the server should listen to
+             *  @param backlog how many unestablished connections the OS should store, can be changed
+             *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror(), 
+             *          a code of smaller than zero indicates an error and errno is set to the last error
+             *          a code of greater than zero indicates a warning and errno is set to the last warning
+             */
+            cppsock::utility_error_t start(const char *hostname, const char *service, int backlog = 5)
             {
                 if(this->_collection == nullptr) return cppsock::utility_error_fail;
                 cppsock::utility_error_t error =  this->_listener.setup(hostname, service, backlog);
@@ -69,8 +86,17 @@ namespace cppsock
                 _listener_running = true;
                 return error;
             }
-
-            cppsock::utility_error_t start(const char *hostname, uint16_t port, int backlog)
+            /**
+             *  @brief starts the tcp handled server, a valid socket collection must be linked with this instance
+             * 
+             *  @param hostname the ip address the listener should listen to
+             *  @param port the port number the server should listen to
+             *  @param backlog how many unestablished connections the OS should store, can be changed
+             *  @return cppsock utility error code that can be transformed into a human-readable string with cppsock::utility_strerror(), 
+             *          a code of smaller than zero indicates an error and errno is set to the last error
+             *          a code of greater than zero indicates a warning and errno is set to the last warning
+             */
+            cppsock::utility_error_t start(const char *hostname, uint16_t port, int backlog = 5)
             {
                 if(this->_collection == nullptr) return cppsock::utility_error_fail;
                 cppsock::utility_error_t error =  this->_listener.setup(hostname, port, backlog);
@@ -80,6 +106,10 @@ namespace cppsock
                 return error;
             }
 
+            /**
+             * @brief closes this server, connections established from this instance are not closed
+             * 
+             */
             void stop()
             {
                 if(this->_listener_running)
@@ -90,6 +120,12 @@ namespace cppsock
                 }
             }
 
+            /**
+             * @brief Set the collection object, only works if the server is not running
+             * 
+             * @param collection pointer to a collection object
+             * @return true on success, false if the server is running
+             */
             bool set_collection(cppsock::tcp::socket_collection *collection)
             {
                 if(this->_listener_running) return false;
@@ -97,6 +133,11 @@ namespace cppsock
                 return true;
             }
 
+            /**
+             * @brief get the underlying listener object
+             * 
+             * @return const referecne to the underlying listener 
+             */
             inline const cppsock::tcp::listener &listener()
             {
                 return this->_listener;
@@ -105,5 +146,3 @@ namespace cppsock
         }; // namespace server
     } // namespace tcp 
 } // namespace cppsock
-
-#endif // CPPSOCK_TCP_SERVER_HPP_INCLUDED

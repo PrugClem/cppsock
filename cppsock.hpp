@@ -9,8 +9,7 @@
  * 
  */
 
-#ifndef CPPSOCK_HPP_INCLUDED
-#define CPPSOCK_HPP_INCLUDED
+#pragma once
 
 // std include files
 #include <functional>
@@ -118,5 +117,3 @@ inline __wsa_loader_class __wsa_loader_instance;
 #include "cppsock_udp_socket.hpp"
 #include "cppsock_tcp_socket_collection.hpp"
 #include "cppsock_tcp_server.hpp"
-
-#endif // CPPSOCK_HPP_INCLUDED

@@ -10,8 +10,7 @@
  */
 #include "cppsock.hpp"
 
-#ifndef CPPSOCK_TYPES_HPP_INCLUDED
-#define CPPSOCK_TYPES_HPP_INCLUDED
+#pragma once
 
 namespace cppsock
 {
@@ -26,7 +25,8 @@ namespace cppsock
     {
         IP_unspec = AF_UNSPEC,  // unspecified / invalid IP family
         IPv4 = AF_INET,         // ip family for IPv4
-        IPv6 = AF_INET6         // ip family for IPv6
+        IPv6 = AF_INET6,        // ip family for IPv6
+        IPvDefault = IPv6        // default IP family
     };
 
     /**
@@ -89,15 +89,6 @@ namespace cppsock
         shutdown_recv = SHUT_RD,
         shutdown_both = SHUT_RDWR,
     };
-
-    // loopback address constants, default is IPv6
-    template <uint16_t port, ip_family fam = cppsock::IPv6> const cppsock::socketaddr loopback;
-    template <uint16_t port> const cppsock::socketaddr loopback<port, cppsock::IPv4> = cppsock::socketaddr("127.0.0.1", port);
-    template <uint16_t port> const cppsock::socketaddr loopback<port, cppsock::IPv6> = cppsock::socketaddr("::1", port);
-    // any address constants, default is IPv6
-    template<uint16_t port, ip_family fam = cppsock::IPv6> const cppsock::socketaddr any_addr;
-    template<uint16_t port> const cppsock::socketaddr any_addr<port, cppsock::IPv4> = cppsock::socketaddr("0.0.0.0", port);
-    template<uint16_t port> const cppsock::socketaddr any_addr<port, cppsock::IPv6> = cppsock::socketaddr("::", port);
 
     template<typename Tout, typename Tin> Tout binary_cast(Tin in)
     {
@@ -181,5 +172,3 @@ namespace cppsock
      */
     template<> inline double   ntoh<double>  (double   in) {return binary_cast<double>(hton<uint64_t>(binary_cast<uint64_t>(in) ));}
 } // namespace cppsock
-
-#endif // CPPSOCK_TYPES_HPP_INCLUDED

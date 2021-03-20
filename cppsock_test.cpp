@@ -72,12 +72,12 @@ void test_collection(uint16_t port)
             } 
         );
     cppsock::tcp::server server(&collection);
-    server.start(nullptr, port, 2);
+    server.start(cppsock::make_any(port), 2);
     std::cout << "started server" << std::endl;
     clients.resize(6);
     for(cppsock::tcp::client &client : clients)
     {
-        client.connect(nullptr, port);
+        client.connect(cppsock::make_loopback(port));
         std::lock_guard<std::mutex> lock(stdoutmtx);
         std::cout << "connected: " << client.sock().getpeername() << std::endl;
     }
@@ -167,7 +167,7 @@ int main()
     std::cout << "Test 2: Simple UDP socket, port 10002" << std::endl;
     cppsock::udp_socket_setup(sock_server, nullptr, 10002);                                     check_errno("Error setting up udp socket 10002");
     cppsock::udp_socket_setup(sock_client, nullptr, (uint16_t)0);                               check_errno("Error setting up udp socket 0");
-    cppsock::udp_socket_setup(sock_listener, cppsock::loopback<0>);                             check_errno("Error setting up udp socket any");
+    cppsock::udp_socket_setup(sock_listener, cppsock::make_loopback(0));                        check_errno("Error setting up udp socket any");
     std::cout << "udp socket, port 10002: " << sock_server.getsockname() << std::endl;          check_errno("Error printing udp 10002 sockname");
     std::cout << "udp socket, port 0: " << sock_client.getsockname() << std::endl;              check_errno("Error printing udp null socket");
     std::cout << "udp socket any: " << sock_listener.getsockname() << std::endl;                check_errno("Error printing udp any socket");
