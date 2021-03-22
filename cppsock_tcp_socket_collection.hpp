@@ -41,6 +41,7 @@ namespace cppsock
             callback_t on_recv;                 // function that is called if data is available
             callback_t on_disconnect;           // function that is called if socket gets disconnected
             std::atomic_size_t n_connections;   // number of stored connections
+            std::atomic_bool clearing;
             
             /**
              * @brief handles the raw socket I/O and calls the callback functions
@@ -82,7 +83,7 @@ namespace cppsock
              * @brief Construct a new socket collection object
              * 
              * @param on_insert insert handler function pointer, persistent pointer is specifically for the programmer as a generic pointer
-             * @param on_recv receive function pointer, persistent pointer is specifically for the programmer as a generic pointer
+             * @param on_recv receive function pointer, persistent pointer is specifically for the programmer as a generic pointer, WARNING: a recv call to the socket may result in an error return value at any point, if this is the case, return the callback function
              * @param on_disconnect disconnect handler function pointer, persistent pointer is specifically for the programmer as a generic pointer
              *          !!! socket object is no longer valid !!!
              */
@@ -96,6 +97,7 @@ namespace cppsock
                 this->on_recv = on_recv;
                 this->on_disconnect = on_disconnect;
                 this->n_connections = 0;
+                this->clearing = false;
             }
     
             virtual ~socket_collection(void)
@@ -108,10 +110,11 @@ namespace cppsock
              *         The socket-connection will be handled in an unique thread.
              *  
              *  @param _sock socket to store into the collection, After the function call, this socket is moved away!
-             *  @return pointer to the socket, now inside the collection
+             *  @return pointer to the socket, now inside the collection, if it returns a nullptr, the socket could not be inserted into the collection
              */
             std::shared_ptr<cppsock::tcp::socket> insert(cppsock::tcp::socket &_sock)
             {
+                if(this->clearing) return nullptr;  // abort if clearing
                 std::shared_ptr<cppsock::tcp::socket> sock = std::make_shared<cppsock::tcp::socket>();  // make new socket object
                 connection_details details;
                 sock->swap(_sock);                                                                      // move / swap _sock into the new object -> _sock gets invalid
@@ -139,11 +142,13 @@ namespace cppsock
              */
             void clear()
             {
+                this->clearing = true;          // mark this instance to be cleared
                 this->map_sync.lock();          // lock, because there can be a chance that a thread tries to remove an object from the map at the same time
                 for(auto &iter : this->sockets)
                     iter.first->close();        // close all sockets in the collection
                 this->map_sync.unlock();        
                 while(this->sockets.size() > 0) {std::this_thread::yield();} // wait forall sockets to be removed
+                this->clearing = false;         // mark this instace to be no longer cleared
             }
 
             /**

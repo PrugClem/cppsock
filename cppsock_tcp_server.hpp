@@ -31,7 +31,8 @@ namespace cppsock
                 {
                     if(tar->_listener.accept(sock) == 0)
                     {
-                        tar->_collection->insert(sock);
+                        if(tar->_collection->insert(sock) == nullptr)
+                            sock.close(); // close on error
                     }
                     else
                     {

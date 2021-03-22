@@ -126,6 +126,11 @@ namespace cppsock
          */
         error_t accept(socket &con)
         {
+            if(con.is_valid())
+            {
+                errno = EEXIST;
+                return -1;
+            }
             con.sock = ::accept(this->sock, nullptr, nullptr);
             if( __is_error(con.sock) )
             {

@@ -62,8 +62,14 @@ void test_collection(uint16_t port)
             [&stdoutmtx](std::shared_ptr<cppsock::tcp::socket> sock, cppsock::socketaddr_pair addr, void** pers)
             {   std::lock_guard<std::mutex> lock(stdoutmtx);
                 char buf[16];
-                sock->recv(buf, sizeof(buf), 0);
-                std::cout << "[callback] echoing to " << addr.remote << ": " << buf << std::endl;
+                ssize_t ret = sock->recv(buf, sizeof(buf), 0);
+                if(ret > 0)
+                    std::cout << "[callback] echoing to " << addr.remote << ": " << buf << std::endl;
+                else
+                {
+                    std::cout << "[callback] connection closed in on_recv handler: " << addr.remote << std::endl;
+                    return;
+                }
                 sock->send(buf, strlen(buf)+1, 0);
             },
             [&stdoutmtx](std::shared_ptr<cppsock::tcp::socket> sock, cppsock::socketaddr_pair addr, void** pers)
@@ -74,12 +80,10 @@ void test_collection(uint16_t port)
     cppsock::tcp::server server(&collection);
     server.start(cppsock::make_any(port), 2);
     std::cout << "started server" << std::endl;
-    clients.resize(6);
+    clients.resize(10);
     for(cppsock::tcp::client &client : clients)
     {
         client.connect(cppsock::make_loopback(port));
-        std::lock_guard<std::mutex> lock(stdoutmtx);
-        std::cout << "connected: " << client.sock().getpeername() << std::endl;
     }
     for(cppsock::tcp::client& client : clients)
     {
