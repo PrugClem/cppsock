@@ -26,7 +26,7 @@ namespace cppsock
         IP_unspec = AF_UNSPEC,  // unspecified / invalid IP family
         IPv4 = AF_INET,         // ip family for IPv4
         IPv6 = AF_INET6,        // ip family for IPv6
-        IPvDefault = IPv6        // default IP family
+        IPvDefault = IPv6       // default IP family (IPv6)
     };
 
     /**
@@ -87,7 +87,7 @@ namespace cppsock
     {
         shutdown_send = SHUT_WR,
         shutdown_recv = SHUT_RD,
-        shutdown_both = SHUT_RDWR,
+        shutdown_both = SHUT_RDWR
     };
 
     template<typename Tout, typename Tin> Tout binary_cast(Tin in)

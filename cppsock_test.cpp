@@ -62,7 +62,7 @@ void test_collection(uint16_t port)
             [&stdoutmtx](std::shared_ptr<cppsock::tcp::socket> sock, cppsock::socketaddr_pair addr, void** pers)
             {   std::lock_guard<std::mutex> lock(stdoutmtx);
                 char buf[16];
-                ssize_t ret = sock->recv(buf, sizeof(buf), 0);
+                std::streamsize ret = sock->recv(buf, sizeof(buf), 0);
                 if(ret > 0)
                     std::cout << "[callback] echoing to " << addr.remote << ": " << buf << std::endl;
                 else

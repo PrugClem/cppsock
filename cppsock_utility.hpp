@@ -318,7 +318,9 @@ namespace cppsock
         switch (code)
         {
         case cppsock::utility_error_none:
-            return "Utility call was successful";
+            return "utility call was successful";
+        case cppsock::utility_warning_keepalive:
+            return "failed to set keepalive socket option";
         case cppsock::utility_error_fail:
             return "utility function failed to execute successfully";
         case cppsock::utility_error_initialised:
