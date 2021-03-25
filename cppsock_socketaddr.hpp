@@ -8,13 +8,9 @@
  * @copyright Copyright (c) 2021
  * 
  */
-
 #include "cppsock.hpp"
 
-#include "cppsock_types.hpp"
-
-#ifndef CPPSOCK_SOCKETADDR_HPP_INCLUDED
-#define CPPSOCK_SOCKETADDR_HPP_INCLUDED
+#pragma once
 
 namespace cppsock
 {
@@ -303,7 +299,35 @@ namespace cppsock
             return memcmp(&this->sa, &other.sa, sizeof(this->sa)) < 0;
         }
 
-    };
-} // namespace cppsock
+    }; // class socketaddr
 
-#endif // CPPSOCK_SOCKETADDR_HPP_INCLUDED
+    // functions to create a loopback address without template port numbers
+    template<cppsock::ip_family fam = cppsock::IPvDefault> const cppsock::socketaddr make_loopback(uint16_t port);
+    template<> inline const cppsock::socketaddr make_loopback<cppsock::IPv4> (uint16_t port) { return cppsock::socketaddr("127.0.0.1", port); }
+    template<> inline const cppsock::socketaddr make_loopback<cppsock::IPv6> (uint16_t port) { return cppsock::socketaddr("::1", port); }
+
+    // functions to create any addresses without template port numbers
+    template<cppsock::ip_family fam = cppsock::IPvDefault> const cppsock::socketaddr make_any(uint16_t port);
+    template<> inline const cppsock::socketaddr make_any<cppsock::IPv4> (uint16_t port) { return cppsock::socketaddr("0.0.0.0", port); }
+    template<> inline const cppsock::socketaddr make_any<cppsock::IPv6> (uint16_t port) { return cppsock::socketaddr("::", port); }
+
+
+    // loopback address constants with template port numbers
+    template <uint16_t port, ip_family fam = cppsock::IPvDefault> const cppsock::socketaddr loopback;
+    template <uint16_t port> inline const cppsock::socketaddr loopback<port, cppsock::IPv4> = cppsock::make_loopback<cppsock::IPv4>(port);
+    template <uint16_t port> inline const cppsock::socketaddr loopback<port, cppsock::IPv6> = cppsock::make_loopback<cppsock::IPv6>(port);
+
+    // any address constants with template port numbers
+    template<uint16_t port, ip_family fam = cppsock::IPvDefault> const cppsock::socketaddr any_addr;
+    template<uint16_t port> inline const cppsock::socketaddr any_addr<port, cppsock::IPv4> = cppsock::make_any<cppsock::IPv4>(port);
+    template<uint16_t port> inline const cppsock::socketaddr any_addr<port, cppsock::IPv6> = cppsock::make_any<cppsock::IPv6>(port);
+
+    /**
+     * @brief a pair that stores both local and remote address
+     */
+    struct socketaddr_pair
+    {
+        cppsock::socketaddr local, remote;
+    }; // struct socketaddr_pair
+    //using socketaddr_pair = std::pair<cppsock::socketaddr, cppsock::socketaddr>;
+} // namespace cppsock

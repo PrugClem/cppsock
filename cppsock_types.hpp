@@ -10,8 +10,7 @@
  */
 #include "cppsock.hpp"
 
-#ifndef CPPSOCK_TYPES_HPP_INCLUDED
-#define CPPSOCK_TYPES_HPP_INCLUDED
+#pragma once
 
 namespace cppsock
 {
@@ -26,7 +25,8 @@ namespace cppsock
     {
         IP_unspec = AF_UNSPEC,  // unspecified / invalid IP family
         IPv4 = AF_INET,         // ip family for IPv4
-        IPv6 = AF_INET6         // ip family for IPv6
+        IPv6 = AF_INET6,        // ip family for IPv6
+        IPvDefault = IPv6       // default IP family (IPv6)
     };
 
     /**
@@ -87,17 +87,15 @@ namespace cppsock
     {
         shutdown_send = SHUT_WR,
         shutdown_recv = SHUT_RD,
-        shutdown_both = SHUT_RDWR,
+        shutdown_both = SHUT_RDWR
     };
 
-    // loopback address constants, default is IPv6
-    template <uint16_t port, ip_family fam = cppsock::IPv6> const cppsock::socketaddr loopback;
-    template <uint16_t port> const cppsock::socketaddr loopback<port, cppsock::IPv4> = cppsock::socketaddr("127.0.0.1", port);
-    template <uint16_t port> const cppsock::socketaddr loopback<port, cppsock::IPv6> = cppsock::socketaddr("::1", port);
-    // any address constants, default is IPv6
-    template<uint16_t port, ip_family fam = cppsock::IPv6> const cppsock::socketaddr any_addr;
-    template<uint16_t port> const cppsock::socketaddr any_addr<port, cppsock::IPv4> = cppsock::socketaddr("0.0.0.0", port);
-    template<uint16_t port> const cppsock::socketaddr any_addr<port, cppsock::IPv6> = cppsock::socketaddr("::", port);
+    template<typename Tout, typename Tin> Tout binary_cast(Tin in)
+    {
+        static_assert(sizeof(Tin) == sizeof(Tout),
+            "Binary Cast only works with types of the same length");
+        return * ( (Tout*) (&in) );
+    }
 
     /**
      *  @brief converts a number from host byte order to network byte order.
@@ -150,6 +148,14 @@ namespace cppsock
      */
     template<> inline uint32_t hton<uint32_t>(uint32_t in) {return htonl(in);}
     /**
+     * @brief converts a float from host yte order to network byte order
+     */
+    template<> inline float    hton<float>   (float    in) {return binary_cast<float> (hton<uint32_t>( binary_cast<uint32_t>(in) ));}
+    /**
+     * @brief converts a double from host yte order to network byte order
+     */
+    template<> inline double   hton<double>  (double   in) {return binary_cast<double>(hton<uint64_t>( binary_cast<uint64_t>(in) ));}
+    /**
      *  @brief converts a 2-byte number from network byte order to host byte order
      */
     template<> inline uint16_t ntoh<uint16_t>(uint16_t in) {return ntohs(in);}
@@ -157,6 +163,12 @@ namespace cppsock
      *  @brief converts a 4-byte number from network byte order to host byte order
      */
     template<> inline uint32_t ntoh<uint32_t>(uint32_t in) {return ntohl(in);}
+    /**
+     *  @brief converts a float from network byte order to host byte order
+     */
+    template<> inline float    ntoh<float>   (float    in) {return binary_cast<float> (hton<uint32_t>(binary_cast<uint32_t>(in) ));}
+    /**
+     *  @brief converts a double from network byte order to host byte order
+     */
+    template<> inline double   ntoh<double>  (double   in) {return binary_cast<double>(hton<uint64_t>(binary_cast<uint64_t>(in) ));}
 } // namespace cppsock
-
-#endif // CPPSOCK_TYPES_HPP_INCLUDED

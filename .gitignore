@@ -1,5 +1,4 @@
-.vscode/c_cpp_properties.json
-.vscode/settings.json
+.vscode
 cppsock_template.hpp
 cppsock_test
 cppsock_test.exe

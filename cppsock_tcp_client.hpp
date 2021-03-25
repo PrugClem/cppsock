@@ -10,10 +10,7 @@
  */
 #include "cppsock.hpp"
 
-#include "cppsock_types.hpp"
-
-#ifndef CPPSOCK_TCP_CLIENT_HPP_INCLUDED
-#define CPPSOCK_TCP_CLIENT_HPP_INCLUDED
+#pragma once
 
 namespace cppsock
 {
@@ -88,5 +85,3 @@ namespace cppsock
     } // namespace tcp
     
 } // namespace cppsock
-
-#endif // CPPSOCK_TCP_CLIENT_HPP_INCLUDED

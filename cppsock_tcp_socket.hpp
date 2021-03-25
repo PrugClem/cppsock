@@ -9,14 +9,8 @@
  * 
  */
 #include "cppsock.hpp"
-#ifndef CPPSOCK_HPP_INCLUDED
-#error this file is included by in cppsock.hpp
-#endif
 
-#include "cppsock_types.hpp"
-
-#ifndef CPPSOCK_TCP_SOCKET_HPP_INCLUDED
-#define CPPSOCK_TCP_SOCKET_HPP_INCLUDED
+#pragma once
 
 namespace cppsock
 {
@@ -28,6 +22,20 @@ namespace cppsock
         protected:
             cppsock::socket _sock;
         public:
+            socket() : _sock() { }
+            socket(socket &&other)
+            {
+                this->_sock = std::move(other._sock);
+            }
+            virtual ~socket()
+            {
+                this->close();
+            }
+            
+            void swap(cppsock::tcp::socket &other)
+            {
+                std::swap(this->_sock, other._sock);
+            }
             /**
              *  @brief sends data over this tcp connection
              *  @param data pointer to the start of the data array
@@ -103,6 +111,10 @@ namespace cppsock
                 return cppsock::swap_error_none;
             }
 
+            error_t shutdown(cppsock::shutdown_mode how)
+            {
+                return this->_sock.shutdown(how);
+            }
             /**
              *  @brief terminates the connection, closes and invalidates the socket
              *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
@@ -114,8 +126,6 @@ namespace cppsock
                 return this->_sock.close();
             }
 
-        };
+        }; // class socket
     } // namespace tcp
 } // namespace cppsock
-
-#endif // CPPSOCK_TCP_SOCKET_HPP_INCLUDED

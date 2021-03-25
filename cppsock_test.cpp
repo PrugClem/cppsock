@@ -9,7 +9,8 @@
 
 void print_error(const char* msg)
 {
-    perror(msg);
+    //perror(msg);
+    printf("%s: %s\n", msg, strerror(errno));
     fflush(stderr);
     errno = 0;
 }
@@ -49,6 +50,59 @@ void init_buf(char *buf, size_t len)
     }
 }
 
+void test_collection(uint16_t port)
+{
+    std::mutex stdoutmtx;
+    std::vector<cppsock::tcp::client> clients;
+    cppsock::tcp::socket_collection collection (
+            [&stdoutmtx](std::shared_ptr<cppsock::tcp::socket> sock, cppsock::socketaddr_pair addr, void** pers)
+            {   std::lock_guard<std::mutex> lock(stdoutmtx);
+                std::cout << "[callback] connected " << addr.remote << std::endl;
+            },
+            [&stdoutmtx](std::shared_ptr<cppsock::tcp::socket> sock, cppsock::socketaddr_pair addr, void** pers)
+            {   std::lock_guard<std::mutex> lock(stdoutmtx);
+                char buf[16];
+                std::streamsize ret = sock->recv(buf, sizeof(buf), 0);
+                if(ret > 0)
+                    std::cout << "[callback] echoing to " << addr.remote << ": " << buf << std::endl;
+                else
+                {
+                    std::cout << "[callback] connection closed in on_recv handler: " << addr.remote << std::endl;
+                    return;
+                }
+                sock->send(buf, strlen(buf)+1, 0);
+            },
+            [&stdoutmtx](std::shared_ptr<cppsock::tcp::socket> sock, cppsock::socketaddr_pair addr, void** pers)
+            {   std::lock_guard<std::mutex> lock(stdoutmtx);
+                std::cout << "[callback] disconnected " << addr.remote << std::endl;
+            } 
+        );
+    cppsock::tcp::server server(&collection);
+    server.start(cppsock::make_any(port), 2);
+    std::cout << "started server" << std::endl;
+    clients.resize(10);
+    for(cppsock::tcp::client &client : clients)
+    {
+        client.connect(cppsock::make_loopback(port));
+    }
+    for(cppsock::tcp::client& client : clients)
+    {
+        client.send("Hello", 6, 0);
+    }
+    for(size_t i=0; i<clients.size()/2; i++) // close half sockets from the client side
+    {
+        cppsock::tcp::client &client = clients.at(i);
+        client.shutdown(cppsock::shutdown_both);
+    }
+    server.stop();
+    stdoutmtx.lock();
+        std::cout << "stopped server" << std::endl;
+        std::cout << "collection content: " << collection.count() << " connections" << std::endl;
+    stdoutmtx.unlock();
+    collection.clear();
+    std::cout << "cleared collection" << std::endl;
+}
+
 int main()
 {
     cppsock::socket sock_listener, sock_server, sock_client;
@@ -61,18 +115,35 @@ int main()
 
     const size_t buflen = 256;
     uint64_t byte_test = 0x4142434445464748;
+    float float_test = 1.12345;
+    double double_test = 1.12345;
     char sendbuf[buflen], recvbuf[buflen];
 
     std::cout << "This machine's hostname: \"" << cppsock::hostname() << "\"" << std::endl;
 
+    // ntoh and hton test with uint64_t
     std::cout << "byte_test: " << std::hex << byte_test << std::endl;
     std::cout << "cppsock::hton<uint64_t>(byte_test): " << cppsock::hton<uint64_t>(byte_test) << std::endl;
     std::cout << "cppsock::ntoh<uint64_t>(cppsock::hton<uint64_t>(byte_test)): " << cppsock::ntoh<uint64_t>(cppsock::hton<uint64_t>(byte_test)) << std::endl;
     if( byte_test != cppsock::ntoh<uint64_t>(cppsock::hton<uint64_t>(byte_test)) )
     {
-        std::cerr << "error: mistake in hton or ntoh" << std::endl;
+        abort("error: mistake in hton<uint64_t> or ntoh<uint64_t>");
     }
     std::cout << std::dec << std::endl;
+    // ntoh and hton test with float
+    std::cout << "float_test:" << float_test << std::endl;
+    std::cout << "cppsock::ntoh<float>(cppsock::hton<float>(float_test)): " << cppsock::ntoh<float>(cppsock::hton<float>(float_test)) << std::endl;
+    if(float_test != cppsock::ntoh<float>(cppsock::hton<float>(float_test)) )
+    {
+        abort("error: mistake in hton<float> or ntoh<float>");
+    }
+    // ntoh and hton test with double
+    std::cout << "double_test: " << double_test << std::endl;
+    std::cout << "cppsock::ntoh<double>(cppsock::hton<double>(double_test))" << cppsock::ntoh<double>(cppsock::hton<double>(double_test)) << std::endl;
+    if(double_test != cppsock::ntoh<double>(cppsock::hton<double>(double_test)) )
+    {
+        abort("error: mistake in hton<double> or ntoh<double>");
+    }
 
     errno = 0;
     std::cout << "Test 0: resolving passive loopback addresses" << std::endl;
@@ -100,7 +171,7 @@ int main()
     std::cout << "Test 2: Simple UDP socket, port 10002" << std::endl;
     cppsock::udp_socket_setup(sock_server, nullptr, 10002);                                     check_errno("Error setting up udp socket 10002");
     cppsock::udp_socket_setup(sock_client, nullptr, (uint16_t)0);                               check_errno("Error setting up udp socket 0");
-    cppsock::udp_socket_setup(sock_listener, cppsock::loopback<0>);                             check_errno("Error setting up udp socket any");
+    cppsock::udp_socket_setup(sock_listener, cppsock::make_loopback(0));                        check_errno("Error setting up udp socket any");
     std::cout << "udp socket, port 10002: " << sock_server.getsockname() << std::endl;          check_errno("Error printing udp 10002 sockname");
     std::cout << "udp socket, port 0: " << sock_client.getsockname() << std::endl;              check_errno("Error printing udp null socket");
     std::cout << "udp socket any: " << sock_listener.getsockname() << std::endl;                check_errno("Error printing udp any socket");
@@ -201,9 +272,13 @@ int main()
                                                                                 std::cout << "Swapping tests 4" << std::endl;
     cppsock::udp_socket_setup(sock_client, cppsock::any_addr<10009>);           check_errno("Error setting up UDP socket [::]:10009");
     if((swap_err = tcp_socket.swap(sock_client))   == cppsock::swap_error_none) abort("swap tcp sock <-> udp sock succeeded", cppsock::swap_strerror(swap_err));
-    errno=0; sock_client.close();                                               check_errno("Error closing udp socket");
+    errno=0; sock_client.close(); std::cout << std::endl;                       check_errno("Error closing udp socket");
+
+    std::cout << "Test 10: using tcp handled server" << std::endl;
+    test_collection(10010);
+    std::cout << std::endl;
 
      // test completed successfully
-    std::cout << std::endl  << "=====================================================" << std::endl
-                            << "cppsock test completed successfully" << std::endl << std::endl;
+    std::cout   << "=====================================================" << std::endl
+                << "cppsock test completed successfully" << std::endl << std::endl;
 }

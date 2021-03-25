@@ -10,10 +10,7 @@
  */
 #include "cppsock.hpp"
 
-#include "cppsock_types.hpp"
-
-#ifndef CPPSOCK_UDP_SOCKET_HPP_INCLUDED
-#define CPPSOCK_UDP_SOCKET_HPP_INCLUDED
+#pragma once
 
 namespace cppsock
 {
@@ -71,7 +68,7 @@ namespace cppsock
              *  @param dst pointer to a class where the data should be sent to, use nullptr to use default address
              *  @return if smaller than 0, an error occured and errno is set appropriately, the total amount of bytes sent otherwise
              */
-            ssize_t sendto(const void* data, size_t len, msg_flags flags, const socketaddr *dst)
+            std::streamsize sendto(const void* data, size_t len, msg_flags flags, const socketaddr *dst)
             {
                 return this->_sock.sendto(data, len, flags, dst);
             }
@@ -83,7 +80,7 @@ namespace cppsock
              *  @param src pointer to a class where the source address should be written into, use nullptr do discard the src address
              *  @return 0 if the connection has been closed, smaller than 0 if an error occured, the amount of bytes received otherwise
              */
-            ssize_t recvfrom(void* data, size_t maxlen, msg_flags flags, socketaddr *src)
+            std::streamsize recvfrom(void* data, size_t maxlen, msg_flags flags, socketaddr *src)
             {
                 return this->_sock.recvfrom(data, maxlen, flags, src);
             }
@@ -127,5 +124,3 @@ namespace cppsock
     } // namespace udp
     
 } // namespace cppsock
-
-#endif // CPPSOCK_UDP_SOCKET_HPP_INCLUDED

@@ -9,16 +9,28 @@
  * 
  */
 
-#ifndef CPPSOCK_HPP_INCLUDED
-#define CPPSOCK_HPP_INCLUDED
+#pragma once
 
 // std include files
+#include <functional>
 #include <iostream>
 #include <string.h>
 #include <sstream>
+#include <atomic>
+#include <memory>
 #include <cerrno>
 #include <string>
 #include <vector>
+#include <map>
+
+// mingw-compatiblity
+#ifdef CPPSOCK_MINGW_IMPLEMENTATION
+    #include <mingw.stdthread.h>
+    #include <mingw.condition_variable.h>
+#else
+    #include <thread>
+    #include <condition_variable>
+#endif
 
 #if defined __linux__ || defined __CYGWIN__
 
@@ -88,6 +100,8 @@ public:
 };
 inline __wsa_loader_class __wsa_loader_instance;
 
+#pragma comment(lib, "ws2_32.lib")
+
 #else // else if defined _WIN32
 #error unsupported OS used
 #endif
@@ -101,5 +115,5 @@ inline __wsa_loader_class __wsa_loader_instance;
 #include "cppsock_tcp_listener.hpp"
 #include "cppsock_tcp_client.hpp"
 #include "cppsock_udp_socket.hpp"
-
-#endif // CPPSOCK_HPP_INCLUDED
+#include "cppsock_tcp_socket_collection.hpp"
+#include "cppsock_tcp_server.hpp"
