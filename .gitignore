@@ -1,4 +1,2 @@
-.vscode
-cppsock_template.hpp
-cppsock_test
-cppsock_test.exe
+.vs
+out
