@@ -9,8 +9,9 @@
 
 void print_error(const char* msg)
 {
-    //perror(msg);
-    printf("%s: %s\n", msg, strerror(errno));
+    printf("error message: %s", msg);
+    perror(msg);
+    //printf("%s: %s\n", msg, strerror(errno));
     fflush(stderr);
     errno = 0;
 }
