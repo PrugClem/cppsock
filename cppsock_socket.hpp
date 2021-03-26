@@ -163,8 +163,12 @@ namespace cppsock
          */
         std::streamsize send(const void* data, size_t len, msg_flags flags)
         {
-            std::streamsize ret = ::send(this->sock, (const char*)data, len, flags); // typecast to const char* is needed because windows
+#ifdef _WIN32
+            std::streamsize ret = ::send(this->sock, (const char*)data, (int)len, flags);// typecast is needed because windows
             if( __is_error(ret) ) __set_errno_from_WSA();
+#else
+            std::streamsize ret = ::send(this->sock, data, len, flags); 
+#endif
             return ret;
         }
         /**
@@ -176,8 +180,12 @@ namespace cppsock
          */
         std::streamsize recv(void* data, size_t maxlen, msg_flags flags)
         {
-            std::streamsize ret = ::recv(this->sock, (char*)data, maxlen, flags); // typecast to char* is needed because windows
+#ifdef _WIN32
+            std::streamsize ret = ::recv(this->sock, (char*)data, (int)maxlen, flags); // typecast is needed because windows
             if( __is_error(ret) ) __set_errno_from_WSA();
+#else
+            std::streamsize ret = ::recv(this->sock, data, maxlen, flags);
+#endif
             return ret;
         }
         /**
@@ -190,9 +198,14 @@ namespace cppsock
          */
         std::streamsize sendto(const void* data, size_t len, msg_flags flags, const socketaddr *dst)
         {
-            std::streamsize ret = (dst == nullptr) ? ::sendto(this->sock, (const char*)data, len, flags, nullptr, 0) :               // typecast to const char* is needed because windows
-                                            ::sendto(this->sock, (const char*)data, len, flags, dst->data(), sizeof(*dst)); // typecast to const char* is needed because windows
+#ifdef _WIN32
+            std::streamsize ret = (dst == nullptr) ? ::sendto(this->sock, (const char*)data, (int)len, flags, nullptr, 0) :               // typecast to const char* is needed because windows
+                                                     ::sendto(this->sock, (const char*)data, (int)len, flags, dst->data(), sizeof(*dst)); // typecast to const char* is needed because windows
             if( __is_error(ret) ) __set_errno_from_WSA();
+#else
+            std::streamsize ret = (dst == nullptr) ? ::sendto(this->sock, data, len, flags, nullptr, 0) :
+                                                     ::sendto(this->sock, data, len, flags, dst->data(), sizeof(*dst));
+#endif
             return ret;
         }
         /**
@@ -206,9 +219,14 @@ namespace cppsock
         std::streamsize recvfrom(void* data, size_t max_len, msg_flags flags, socketaddr *src)
         {
             socklen_t socklen = sizeof(*src);
-            std::streamsize ret = (src == nullptr) ? ::recvfrom(this->sock, (char*)data, max_len, flags, nullptr, nullptr) :     // typecast to char* is needed because windows
-                                            ::recvfrom(this->sock, (char*)data, max_len, flags, src->data(), &socklen); // typecast to char* is needed because windows
+#ifdef _WIN32
+            std::streamsize ret = (src == nullptr) ? ::recvfrom(this->sock, (char*)data, (int)max_len, flags, nullptr, nullptr) :     // typecast to char* is needed because windows
+                                                     ::recvfrom(this->sock, (char*)data, (int)max_len, flags, src->data(), &socklen); // typecast to char* is needed because windows
             if( __is_error(ret) ) __set_errno_from_WSA();
+#else
+            std::streamsize ret = (src == nullptr) ? ::recvfrom(this->sock, data, max_len, flags, nullptr, nullptr) :     
+                                                     ::recvfrom(this->sock, data, max_len, flags, src->data(), &socklen); 
+#endif
             return ret;
         }
 

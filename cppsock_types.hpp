@@ -14,6 +14,7 @@
 
 namespace cppsock
 {
+    // forward definitions for classes
     class socketaddr;
     class addressinfo;
     class socket;
@@ -107,7 +108,7 @@ namespace cppsock
                         "Only works with unsigned integers");
         T res = 0;
         uint8_t *poin = (uint8_t*)&res;
-        for(ssize_t b=sizeof(T)-1; b>=0; b--) // iterate from MSB to LSB
+        for(std::streamsize b=sizeof(T)-1; b>=0; b--) // iterate from MSB to LSB
         {
             // extract from MSB to LSB and write them into first to last byte
             // (T)0xff          ensure that the extraction mask is always of the parameter type
@@ -129,7 +130,7 @@ namespace cppsock
                         "Only works with unsigned integers");
         T res = 0;
         uint8_t *poin = (uint8_t*)&par;
-        for(ssize_t b=sizeof(T)-1; b>=0; b--) // iterate from MSB to LSB
+        for(std::streamsize b=sizeof(T)-1; b>=0; b--) // iterate from MSB to LSB
         {
             // extract from first to last byte and write them into MSB to LSB
             // (T)*poin++       extracts bytes from first to last address as LSB
