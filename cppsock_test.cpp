@@ -178,16 +178,16 @@ int main()
     sock_listener.close(); sock_server.close(); sock_client.close(); std::cout << std::endl;    check_errno("Error closing sockets");
 
     std::cout << "Test 3: Socket options" << std::endl;
-    cppsock::tcp_listener_setup(sock_listener, nullptr, 10003, 1);                                                                                  check_errno("Error setting up TCP server");
-    cppsock::tcp_client_connect(sock_client, nullptr, 10003);                                                                                       check_errno("Error connecting to TCP server");
-    sock_listener.accept(sock_server);                                                                                                              check_errno("Error accepting TCP connection");
-    sock_client.set_keepalive(false);                                                                                                               check_errno("Error while setting sock_client keepalive");
-    std::cout << "sock_client keepalive: " << (sock_client.get_keepalive() ? "true" : "false") << std::endl;                                        check_errno("Error while getting sock_client keepalive");
-    sock_client.set_keepalive(true);                                                                                                                check_errno("Error while setting sock_client keepalive");
-    std::cout << "sock_client keepalive: " << (sock_client.get_keepalive() ? "true" : "false") << std::endl;                                        check_errno("Error while getting sock_client keepalive");
-    std::cout << "sock_client socktype: " << ( (sock_client.get_socktype() == SOCK_STREAM) ? "SOCK_STREAM" : "NOT SOCK_STREAM" ) << std::endl;      check_errno("Error while getting sock_client socktype");
-    std::cout << "sock_listener socktype: " << ( (sock_listener.get_socktype() == SOCK_STREAM) ? "SOCK_STREAM" : "NOT SOCK_STREAM" ) << std::endl;  check_errno("Error while getting sock_listener socktype");
-    sock_listener.close(); sock_server.close(); sock_client.close(); std::cout << std::endl;                                                        check_errno("Error closing sockets");
+    cppsock::tcp_listener_setup(sock_listener, nullptr, 10003, 1);                                                                                              check_errno("Error setting up TCP server");
+    cppsock::tcp_client_connect(sock_client, nullptr, 10003);                                                                                                   check_errno("Error connecting to TCP server");
+    sock_listener.accept(sock_server);                                                                                                                          check_errno("Error accepting TCP connection");
+    sock_client.set_keepalive(false);                                                                                                                           check_errno("Error while setting sock_client keepalive");
+    std::cout << "sock_client keepalive: " << (sock_client.get_keepalive() ? "true" : "false") << std::endl;                                                    check_errno("Error while getting sock_client keepalive");
+    sock_client.set_keepalive(true);                                                                                                                            check_errno("Error while setting sock_client keepalive");
+    std::cout << "sock_client keepalive: " << (sock_client.get_keepalive() ? "true" : "false") << std::endl;                                                    check_errno("Error while getting sock_client keepalive");
+    std::cout << "sock_client socktype: " << ( (sock_client.get_socktype() == cppsock::socket_stream) ? "SOCK_STREAM" : "NOT SOCK_STREAM" ) << std::endl;       check_errno("Error while getting sock_client socktype");
+    std::cout << "sock_listener socktype: " << ( (sock_listener.get_socktype() == cppsock::socket_stream) ? "SOCK_STREAM" : "NOT SOCK_STREAM" ) << std::endl;   check_errno("Error while getting sock_listener socktype");
+    sock_listener.close(); sock_server.close(); sock_client.close(); std::cout << std::endl;                                                                    check_errno("Error closing sockets");
 
     std::cout << "Test 4: sending / recving TCP data" << std::endl;
     init_buf(sendbuf, sizeof(sendbuf));

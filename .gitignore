@@ -1,4 +1,4 @@
-.vscode
-cppsock_template.hpp
+out/build/*
+!out/build
 cppsock_test
 cppsock_test.exe
