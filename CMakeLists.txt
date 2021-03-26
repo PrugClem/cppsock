@@ -14,3 +14,7 @@ add_executable(cppsock_test "cppsock_test.cpp")
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(cppsock_test PRIVATE Threads::Threads)
+
+# testing
+enable_testing()
+add_test(main_test cppsock_test)
