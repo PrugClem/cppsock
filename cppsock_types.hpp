@@ -14,6 +14,7 @@
 
 namespace cppsock
 {
+    // forward definitions for classes
     class socketaddr;
     class addressinfo;
     class socket;
