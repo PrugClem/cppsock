@@ -115,8 +115,8 @@ int main()
     cppsock::swap_error swap_err;
 
     const size_t buflen = 256;
-    uint64_t byte_test = 0x4142434445464748;
-    float float_test = 1.12345;
+    uint64_t byte_test = (uint64_t)0x4142434445464748;
+    float float_test = 1.12345f;
     double double_test = 1.12345;
     char sendbuf[buflen], recvbuf[buflen];
 
