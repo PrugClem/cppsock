@@ -33,6 +33,7 @@ namespace cppsock
             };
 
             using callback_t = std::function<void(std::shared_ptr<cppsock::tcp::socket>, cppsock::socketaddr_pair, void**)>;
+            //typedef void(*callback_t)(std::shared_ptr<cppsock::tcp::socket>, cppsock::socketaddr_pair, void**);
             
         protected:
             std::map<std::shared_ptr<cppsock::tcp::socket>, connection_details> sockets;    // stores all the sockets
@@ -112,7 +113,7 @@ namespace cppsock
              *  @param _sock socket to store into the collection, After the function call, this socket is moved away!
              *  @return pointer to the socket, now inside the collection, if it returns a nullptr, the socket could not be inserted into the collection
              */
-            std::shared_ptr<cppsock::tcp::socket> insert(cppsock::tcp::socket &_sock)
+            std::shared_ptr<cppsock::tcp::socket> insert(cppsock::tcp::socket &_sock, void *persistent_default = nullptr)
             {
                 if(this->clearing) return nullptr;  // abort if clearing
                 std::shared_ptr<cppsock::tcp::socket> sock = std::make_shared<cppsock::tcp::socket>();  // make new socket object
@@ -126,6 +127,7 @@ namespace cppsock
                     this->sockets[sock].addrpair.remote = sock->sock().getpeername();
                     this->sockets[sock].running = true;
                     this->sockets[sock].working = true;
+                    this->sockets[sock].persistent = persistent_default;
                     this->sockets[sock].connections = &(this->n_connections);
                 }
 
