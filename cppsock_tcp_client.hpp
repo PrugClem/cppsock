@@ -50,7 +50,7 @@ namespace cppsock
             cppsock::utility_error_t connect(const char *hostname, const char *service)
             {
                 cppsock::utility_error_t err = cppsock::tcp_client_connect(this->_sock, hostname, service);
-                if(err != cppsock::utility_error_none)
+                if(err == cppsock::utility_error_none)
                 {
                     error_t err_sockopt = this->_sock.set_keepalive(true);
                     if(err_sockopt < 0)
@@ -71,7 +71,7 @@ namespace cppsock
             cppsock::utility_error_t connect(const char *hostname, uint16_t port)
             {
                 cppsock::utility_error_t err = cppsock::tcp_client_connect(this->_sock, hostname, port);
-                if(err != cppsock::utility_error_none)
+                if(err == cppsock::utility_error_none)
                 {
                     error_t err_sockopt = this->_sock.set_keepalive(true);
                     if(err_sockopt < 0)
