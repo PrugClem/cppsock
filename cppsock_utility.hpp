@@ -93,9 +93,9 @@ namespace cppsock
     inline utility_error_t tcp_listener_setup(socket &listener, const socketaddr &addr, int backlog)
     {
         if(listener.is_valid()) return cppsock::utility_error_initialised;
-        if(!__is_error(listener.init(addr.get_family(), cppsock::socket_stream, cppsock::ip_protocol_tcp)))
-            if(!__is_error(listener.bind(addr)))
-                if(!__is_error(listener.listen(backlog)))
+        if((listener.init(addr.get_family(), cppsock::socket_stream, cppsock::ip_protocol_tcp)) == 0)
+            if((listener.bind(addr)) == 0)
+                if((listener.listen(backlog)) == 0)
                     return cppsock::utility_error_none;
         if(listener.is_valid()) listener.close(); // close socket is it was open
         return cppsock::utility_error_fail;
@@ -170,10 +170,19 @@ namespace cppsock
     inline utility_error_t tcp_client_connect(socket &client, const socketaddr &addr)
     {
         if(client.is_valid()) return cppsock::utility_error_initialised;
-        if(!__is_error(client.init(addr.get_family(), cppsock::socket_stream, cppsock::ip_protocol_tcp)))
-            if(!__is_error(client.connect(addr)))
+        if ((client.init(addr.get_family(), cppsock::socket_stream, cppsock::ip_protocol_tcp)) == 0)
+        {
+            if ((client.connect(addr)) == 0)
+            {
                 return cppsock::utility_error_none;
-        if(client.is_valid()) client.close(); // close socket is it was open
+            }
+            else
+            {
+                if (client.is_valid()) client.close(); // close socket if it was open
+                return cppsock::utility_error_connect;
+            }
+        }
+        if(client.is_valid()) client.close(); // close socket if it was open
         return cppsock::utility_error_fail;
     }
     /**
@@ -244,8 +253,8 @@ namespace cppsock
     inline utility_error_t udp_socket_setup(socket &sock, const socketaddr &addr)
     {
         if(sock.is_valid()) return cppsock::utility_error_initialised;
-        if(!__is_error(sock.init(addr.get_family(), cppsock::socket_dgram, cppsock::ip_protocol_udp)))
-            if(!__is_error(sock.bind(addr)))
+        if((sock.init(addr.get_family(), cppsock::socket_dgram, cppsock::ip_protocol_udp)) == 0)
+            if((sock.bind(addr)) == 0)
                 return cppsock::utility_error_none;
         if(sock.is_valid()) sock.close(); // close socket is it was open
         return cppsock::utility_error_fail;
@@ -331,6 +340,8 @@ namespace cppsock
             return "getaddrinfo() didn't resolve any addresses";
         case cppsock::utility_error_no_success:
             return "none of the resolved addresses resulted in a success";
+        case utility_error_connect:
+            return "syscall to connect() failed";
         default:
             return "unknown error code provided";
         }

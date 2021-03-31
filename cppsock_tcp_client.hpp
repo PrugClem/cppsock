@@ -29,7 +29,7 @@ namespace cppsock
             cppsock::utility_error_t connect(const cppsock::socketaddr &addr)
             {
                 cppsock::utility_error_t err = cppsock::tcp_client_connect(this->_sock, addr);
-                if(err != cppsock::utility_error_none)
+                if(err == cppsock::utility_error_none)
                 {
                     error_t err_sockopt = this->_sock.set_keepalive(true);
                     if(err_sockopt < 0)

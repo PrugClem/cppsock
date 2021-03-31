@@ -78,6 +78,7 @@ namespace cppsock
         utility_error_gai_fail = -3,    // getaddressinfo() has failed to resolve the given parameter
         utility_error_no_results = -4,  // getaddressinfo() as not given any results
         utility_error_no_success = -5,  // no address resolved by getaddressinfo() could successfully be used
+        utility_error_connect = -6,     // connect did not work successfully
         utility_warning_keepalive = 1   // the keepalive socket option could not be set
     };
 
