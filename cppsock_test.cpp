@@ -112,7 +112,7 @@ int main()
     cppsock::tcp::client tcp_client;
     cppsock::udp::socket udp_sock1, udp_sock2;
 
-    cppsock::swap_error swap_err;
+    cppsock::error_t swap_err;
 
     const size_t buflen = 256;
     uint64_t byte_test = (uint64_t)0x4142434445464748;
@@ -241,9 +241,9 @@ int main()
     cppsock::tcp_listener_setup(sock_listener, cppsock::any_addr<10008>, 1);    check_errno("Error setting up tcp listener port 10008");
     cppsock::tcp_client_connect(sock_client, cppsock::loopback<10008>);         check_errno("Error connection to TCP server port 10008");
     sock_listener.accept(sock_server);                                          check_errno("Error accepting TCP connection");
-    swap_err = tcp_listener.swap(sock_listener);                                check_errno("Error swapping listener socket", cppsock::swap_strerror(swap_err));
-    swap_err = tcp_socket.swap(sock_server);                                    check_errno("Error swapping server tcp socket", cppsock::swap_strerror(swap_err));
-    swap_err = tcp_client.swap(sock_client);                                    check_errno("Error swapping client tcp socket", cppsock::swap_strerror(swap_err));
+    swap_err = tcp_listener.swap(sock_listener);                                check_errno("Error swapping listener socket", cppsock::strerror(swap_err));
+    swap_err = tcp_socket.swap(sock_server);                                    check_errno("Error swapping server tcp socket", cppsock::strerror(swap_err));
+    swap_err = tcp_client.swap(sock_client);                                    check_errno("Error swapping client tcp socket", cppsock::strerror(swap_err));
     init_buf(sendbuf, sizeof(sendbuf)); memset(recvbuf, 0, sizeof(recvbuf));
     tcp_client.send(sendbuf, buflen, 0);                                        check_errno("Error sending data");
     std::cout << "bytes available: " << tcp_socket.available() << std::endl;    check_errno("Error getting available bytes");
@@ -251,8 +251,8 @@ int main()
     std::cout << "Transfered " << buflen << " bytes of data, " << ((memcmp(sendbuf, recvbuf, buflen) == 0) ? "TCP data is the same" : "data is different") << std::endl;
     cppsock::udp_socket_setup(sock_server, cppsock::any_addr<10008>);           check_errno("Error setting up UDP socket [::]:10008");
     cppsock::udp_socket_setup(sock_client, cppsock::any_addr<0>);               check_errno("Error setting up UDP socket [::]:0");
-    swap_err = udp_sock1.swap(sock_server);                                     check_errno("Error swapping UDP socket [::]:10008", cppsock::swap_strerror(swap_err));
-    swap_err = udp_sock2.swap(sock_client);                                     check_errno("Error swapping UDP socket [::]:0", cppsock::swap_strerror(swap_err));
+    swap_err = udp_sock1.swap(sock_server);                                     check_errno("Error swapping UDP socket [::]:10008", cppsock::strerror(swap_err));
+    swap_err = udp_sock2.swap(sock_client);                                     check_errno("Error swapping UDP socket [::]:0", cppsock::strerror(swap_err));
     init_buf(sendbuf, sizeof(sendbuf)); memset(recvbuf, 0, sizeof(recvbuf));
     udp_sock2.sendto(sendbuf, buflen, 0, &cppsock::loopback<10008>);            check_errno("Error sending data");
     udp_sock1.recvfrom(recvbuf, buflen, 0, nullptr);                            check_errno("Error receiving data");
@@ -266,13 +266,13 @@ int main()
     cppsock::tcp_client_connect(sock_client, cppsock::loopback<10009>);         check_errno("Error connecting to TCP server port 10009");
     sock_listener.accept(sock_server);                                          check_errno("Error accepting TCP connection");
                                                                                 std::cout << "Swapping tests 1-3" << std::endl;
-    if((swap_err = tcp_socket.swap(sock_listener)) == cppsock::swap_error_none) abort("swap tcp sock <-> listener succeeded", cppsock::swap_strerror(swap_err));
-    if((swap_err = tcp_listener.swap(sock_server)) == cppsock::swap_error_none) abort("Swap listener <-> tcp sock succeeded", cppsock::swap_strerror(swap_err));
-    if((swap_err = udp_sock1.swap(sock_client))    == cppsock::swap_error_none) abort("Swap udp sock <-> tcp sock succeeded", cppsock::swap_strerror(swap_err));
+    if((swap_err = tcp_socket.swap(sock_listener)) == cppsock::error_none)      abort("swap tcp sock <-> listener succeeded", cppsock::strerror(swap_err));
+    if((swap_err = tcp_listener.swap(sock_server)) == cppsock::error_none)      abort("Swap listener <-> tcp sock succeeded", cppsock::strerror(swap_err));
+    if((swap_err = udp_sock1.swap(sock_client))    == cppsock::error_none)      abort("Swap udp sock <-> tcp sock succeeded", cppsock::strerror(swap_err));
     errno=0; sock_listener.close(); sock_client.close(); sock_server.close();   check_errno("Error closing tcp sockets");
                                                                                 std::cout << "Swapping tests 4" << std::endl;
     cppsock::udp_socket_setup(sock_client, cppsock::any_addr<10009>);           check_errno("Error setting up UDP socket [::]:10009");
-    if((swap_err = tcp_socket.swap(sock_client))   == cppsock::swap_error_none) abort("swap tcp sock <-> udp sock succeeded", cppsock::swap_strerror(swap_err));
+    if((swap_err = tcp_socket.swap(sock_client))   == cppsock::error_none)      abort("swap tcp sock <-> udp sock succeeded", cppsock::strerror(swap_err));
     errno=0; sock_client.close(); std::cout << std::endl;                       check_errno("Error closing udp socket");
 
     std::cout << "Test 10: using tcp handled server" << std::endl;

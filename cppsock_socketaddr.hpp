@@ -113,7 +113,7 @@ namespace cppsock
          *  @param addr the address that should be written into the structure
          *  @return 0 if everything went right, any other return value indicates an error and errno is set appropriately
          */
-        error_t set_addr(const std::string& addr)
+        ::error_t set_addr(const std::string& addr)
         {
             void *addrptr;
             if(this->sa.sa_family == AF_INET)
@@ -136,7 +136,7 @@ namespace cppsock
          *  @param port port number in host byte order
          *  @return 0 if everything went right, any other return value indicates an error and errno is set appropriately
          */
-        error_t set_port(uint16_t port)
+        ::error_t set_port(uint16_t port)
         {
             in_port_t *portaddr;
             if(this->sa.sa_family == AF_INET)
@@ -161,9 +161,9 @@ namespace cppsock
          *  @param port port port number in host byte order
          *  @return 0 if everything went right, any other return value indicates an error and errno is set appropriately
          */
-        error_t set(const std::string& addr, uint16_t port)
+        ::error_t set(const std::string& addr, uint16_t port)
         {
-            error_t error;
+            ::error_t error;
             if( is(cppsock::IPv4, addr) )
                 this->set_family(cppsock::IPv4);
             else if( is(cppsock::IPv6, addr) )
@@ -206,7 +206,7 @@ namespace cppsock
          *  @param out reference to a string where the address should be written into
          *  @return 0 if everything went right, any other return value indicates an error and errno is set appropriately
          */
-        error_t get_addr(std::string &out) const
+        ::error_t get_addr(std::string &out) const
         {
             void const *addrptr;
             if(this->sa.sa_family == AF_INET)
@@ -231,7 +231,7 @@ namespace cppsock
          *  @param out reference to a buffer where the port should be written into
          *  @return 0 if everything went right, any other return value indicates an error and errno is set appropriately
          */
-        error_t get_port(uint16_t &out) const
+        ::error_t get_port(uint16_t &out) const
         {
             if(this->sa.sa_family == AF_INET)
             {
@@ -252,7 +252,7 @@ namespace cppsock
          *  @brief gets the address family
          *  @return the address family
          */
-        ip_family get_family() const
+        cppsock::ip_family get_family() const
         {
             return this->sa.sa_family;
         }

@@ -35,7 +35,7 @@ namespace cppsock
              *          a code of smaller than zero indicates an error and errno is set to the last error
              *          a code of greater than zero indicates a warning and errno is set to the last warning
              */
-            cppsock::utility_error_t setup(const cppsock::socketaddr &addr, int backlog)
+            cppsock::error_t setup(const cppsock::socketaddr &addr, int backlog)
             {
                 return cppsock::tcp_listener_setup(this->_sock, addr, backlog);
             }
@@ -48,7 +48,7 @@ namespace cppsock
              *          a code of smaller than zero indicates an error and errno is set to the last error
              *          a code of greater than zero indicates a warning and errno is set to the last warning
              */
-            cppsock::utility_error_t setup(const char *hostname, const char *service, int backlog)
+            cppsock::error_t setup(const char *hostname, const char *service, int backlog)
             {
                 return cppsock::tcp_listener_setup(this->_sock, hostname, service, backlog);
             }
@@ -61,7 +61,7 @@ namespace cppsock
              *          a code of smaller than zero indicates an error and errno is set to the last error
              *          a code of greater than zero indicates a warning and errno is set to the last warning
              */
-            cppsock::utility_error_t setup(const char *hostname, uint16_t port, int backlog)
+            cppsock::error_t setup(const char *hostname, uint16_t port, int backlog)
             {
                 return cppsock::tcp_listener_setup(this->_sock, hostname, port, backlog);
             }
@@ -79,7 +79,7 @@ namespace cppsock
              *  @return 0 if the sockets could be swapped,
              *          anything smaller than zero indicates an error, the socket are not swapped and errno may be set appropriately
              */
-            cppsock::swap_error swap(cppsock::socket &s)
+            cppsock::error_t swap(cppsock::socket &s)
             {
                 int val = 0;
                 socklen_t len = sizeof(val);
@@ -97,7 +97,7 @@ namespace cppsock
                 }
                 std::swap(this->_sock, s);
                 errno = 0;
-                return cppsock::swap_error_none;
+                return cppsock::error_none;
             }
 
             /**
@@ -107,12 +107,12 @@ namespace cppsock
              *          anything smaller than 0 indicates an error and errno is set appropriately,
              *          anything greater than zero indicates a warning and errno is set appropriately
              */
-            error_t accept(cppsock::tcp::socket &output)
+            ::error_t accept(cppsock::tcp::socket &output)
             {
-                error_t err = this->_sock.accept(output._sock);
+                ::error_t err = this->_sock.accept(output._sock);
                 if(err == 0)
                 {
-                    error_t err_sockopt = this->_sock.set_keepalive(true);
+                    ::error_t err_sockopt = this->_sock.set_keepalive(true);
                     if(err_sockopt < 0)
                     {
                         return cppsock::utility_warning_keepalive;
@@ -124,11 +124,11 @@ namespace cppsock
              *  @brief closes and invalidates the socket
              *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
              */
-            error_t close()
+            ::error_t close()
             {
                 if(this->_sock.shutdown(cppsock::shutdown_both) < 0)
                     errno = 0; // clear error (ignore error on shutdown)
-                error_t err = this->_sock.close();
+                ::error_t err = this->_sock.close();
                 return err;
             }
         };

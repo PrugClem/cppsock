@@ -50,36 +50,34 @@ namespace cppsock
         ip_protocol_udp = IPPROTO_UDP   // use UDP protocol
     };
 
-    /**
-     *  @brief enum for swap errors
-     */
-    enum swap_error : error_t
-    {
-        swap_error_none = 0,            // swap completed successfully
-        swap_error_socktype = -1,       // swap failed: wrong socktype
-        swap_error_listening = -2,      // swap failed: socket is currently listening
-        swap_error_not_listening = -3   // swap failed: socket is currently not listening
-    };
-
     using msg_flags = int;   // type for message flags
-    static constexpr msg_flags oob       = MSG_OOB;         // process out-of-band data
-    static constexpr msg_flags peek      = MSG_PEEK;        // peek incoming message, dont delete it from input queue
-    static constexpr msg_flags dontroute = MSG_DONTROUTE;   // send without using the routing table
-    static constexpr msg_flags waitall   = MSG_WAITALL;     // wait until the entire packet has been processed (sent / received)
+    static constexpr msg_flags msg_oob          = MSG_OOB;         // process out-of-band data
+    static constexpr msg_flags msg_peek         = MSG_PEEK;        // peek incoming message, dont delete it from input queue
+    static constexpr msg_flags msg_dontroute    = MSG_DONTROUTE;   // send without using the routing table
+    static constexpr msg_flags msg_waitall      = MSG_WAITALL;     // wait until the entire packet has been processed (sent / received)
+    static constexpr msg_flags oob              = cppsock::msg_oob;         // process out-of-band data
+    static constexpr msg_flags peek             = cppsock::msg_peek;        // peek incoming message, dont delete it from input queue
+    static constexpr msg_flags dontroute        = cppsock::msg_dontroute;   // send without using the routing table
+    static constexpr msg_flags waitall          = cppsock::msg_waitall;     // wait until the entire packet has been processed (sent / received)
 
     /**
-     *  @brief error codes for utility fuctions, can be converted to a string by cppsock::utility_strerror()
+     * @brief enum for cppsock error codes
      */
-    enum utility_error_t : error_t
+    enum error_t : ::error_t
     {
-        utility_error_none = 0,         // status code to indicate successful execution
+        error_none = 0,                 // status code to indicate successful execution
+
         utility_error_fail = -1,        // utility call failed to execute successfully, no more information provided
         utility_error_initialised = -2, // socket is already initialised
         utility_error_gai_fail = -3,    // getaddressinfo() has failed to resolve the given parameter
         utility_error_no_results = -4,  // getaddressinfo() as not given any results
         utility_error_no_success = -5,  // no address resolved by getaddressinfo() could successfully be used
         utility_error_connect = -6,     // connect did not work successfully
-        utility_warning_keepalive = 1   // the keepalive socket option could not be set
+        utility_warning_keepalive = 1,  // the keepalive socket option could not be set
+
+        swap_error_socktype = -101,     // swap failed: wrong socktype
+        swap_error_listening = -102,    // swap failed: socket is currently listening
+        swap_error_not_listening = -103 // swap failed: socket is currently not listening
     };
 
     /**

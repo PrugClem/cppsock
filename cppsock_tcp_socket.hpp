@@ -63,7 +63,7 @@ namespace cppsock
              *  @param buf reference to a buffer where the amount should be written into
              *  @return 0 if everything went right; anything smaller than 0 indicates an error and errno is set appropriately
              */
-            error_t available(size_t &buf)
+            ::error_t available(size_t &buf)
             {
                 return this->_sock.available(buf);
             }
@@ -90,7 +90,7 @@ namespace cppsock
              *  @return 0 if the sockets could be swapped,
              *          anything smaller than zero indicates an error, the socket are not swapped and errno may be set appropriately
              */
-            cppsock::swap_error swap(cppsock::socket &s)
+            cppsock::error_t swap(cppsock::socket &s)
             {
                 int val = 0;
                 socklen_t len = sizeof(val);
@@ -108,10 +108,10 @@ namespace cppsock
                 }
                 std::swap(this->_sock, s);
                 errno = 0;
-                return cppsock::swap_error_none;
+                return cppsock::error_none;
             }
 
-            error_t shutdown(cppsock::shutdown_mode how)
+            ::error_t shutdown(cppsock::shutdown_mode how)
             {
                 return this->_sock.shutdown(how);
             }
@@ -119,7 +119,7 @@ namespace cppsock
              *  @brief terminates the connection, closes and invalidates the socket
              *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
              */
-            error_t close()
+            ::error_t close()
             {
                 if(this->_sock.shutdown(cppsock::shutdown_both) < 0)
                     errno = 0; // clear error (ignore error on shutdown)

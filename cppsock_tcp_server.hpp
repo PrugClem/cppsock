@@ -59,10 +59,10 @@ namespace cppsock
              *          a code of smaller than zero indicates an error and errno is set to the last error
              *          a code of greater than zero indicates a warning and errno is set to the last warning
              */
-            cppsock::utility_error_t start(const cppsock::socketaddr &addr, int backlog = 5)
+            cppsock::error_t start(const cppsock::socketaddr &addr, int backlog = 5)
             {
                 if(this->_collection == nullptr) return cppsock::utility_error_fail;
-                cppsock::utility_error_t error = this->_listener.setup(addr, backlog);
+                cppsock::error_t error = this->_listener.setup(addr, backlog);
                 if(error < 0) return error;
                 this->_listener_thread = std::thread(cppsock::tcp::server::listen, this);
                 _listener_running = true;
@@ -78,10 +78,10 @@ namespace cppsock
              *          a code of smaller than zero indicates an error and errno is set to the last error
              *          a code of greater than zero indicates a warning and errno is set to the last warning
              */
-            cppsock::utility_error_t start(const char *hostname, const char *service, int backlog = 5)
+            cppsock::error_t start(const char *hostname, const char *service, int backlog = 5)
             {
                 if(this->_collection == nullptr) return cppsock::utility_error_fail;
-                cppsock::utility_error_t error =  this->_listener.setup(hostname, service, backlog);
+                cppsock::error_t error =  this->_listener.setup(hostname, service, backlog);
                 if(error < 0) return error;
                 this->_listener_thread = std::thread(cppsock::tcp::server::listen, this);
                 _listener_running = true;
@@ -97,10 +97,10 @@ namespace cppsock
              *          a code of smaller than zero indicates an error and errno is set to the last error
              *          a code of greater than zero indicates a warning and errno is set to the last warning
              */
-            cppsock::utility_error_t start(const char *hostname, uint16_t port, int backlog = 5)
+            cppsock::error_t start(const char *hostname, uint16_t port, int backlog = 5)
             {
                 if(this->_collection == nullptr) return cppsock::utility_error_fail;
-                cppsock::utility_error_t error =  this->_listener.setup(hostname, port, backlog);
+                cppsock::error_t error =  this->_listener.setup(hostname, port, backlog);
                 if(error < 0) return error;
                 this->_listener_thread = std::thread(cppsock::tcp::server::listen, this);
                 _listener_running = true;

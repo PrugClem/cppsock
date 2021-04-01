@@ -76,7 +76,7 @@ namespace cppsock
          *  @param porotcol protocol to use, e.g. IPPROTO_TCP
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t init(ip_family fam, socket_type type, ip_protocol protocol)
+        ::error_t init(ip_family fam, socket_type type, ip_protocol protocol)
         {
             if(this->is_valid())
             {
@@ -96,7 +96,7 @@ namespace cppsock
          *  @param addr address the socket should be bound to
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t bind(const socketaddr& addr)
+        ::error_t bind(const socketaddr& addr)
         {
             if( __is_error(::bind(this->sock, addr.data(), sizeof(socketaddr)) ) )
             {
@@ -110,7 +110,7 @@ namespace cppsock
          *  @param backlog how many unestablished connections should be logged by the underlying OS
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t listen(int backlog)
+        ::error_t listen(int backlog)
         {
             if( __is_error(::listen(this->sock, backlog) ) )
             {
@@ -124,7 +124,7 @@ namespace cppsock
          *  @param con the socket the connection should be interacted with
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t accept(socket &con)
+        ::error_t accept(socket &con)
         {
             if(con.is_valid())
             {
@@ -144,7 +144,7 @@ namespace cppsock
          *  @param addr the address the socket should be connecting to
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t connect(const socketaddr &addr)
+        ::error_t connect(const socketaddr &addr)
         {
             if( __is_error(::connect(this->sock, addr.data(), sizeof(socketaddr)) ) )
             {
@@ -235,7 +235,7 @@ namespace cppsock
          *  @param buf reference to a buffer where the amount should be written into
          *  @return 0 if everything went right; anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t available(size_t &buf)
+        ::error_t available(size_t &buf)
         {
             int error = ioctlsocket(this->sock, FIONREAD, (unsigned long*)&buf); // typecast because of windows
             if( __is_error(error) )
@@ -249,9 +249,9 @@ namespace cppsock
          *  @brief get the amount of bytes ready to read
          *  @return the amount of bytes to read, if an error occured or no data is ready to be read, 0 is returned
          */
-        size_t available()
+        std::size_t available()
         {
-            size_t rdy = 0;
+            std::size_t rdy = 0;
             if( this->available(rdy) != 0 )
                 rdy = 0;
             return rdy;
@@ -270,7 +270,7 @@ namespace cppsock
          *  @param how how the socket should be shut down, possible options are listed in the enum cppsock::socket::shutdown_mode
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t shutdown(shutdown_mode how)
+        ::error_t shutdown(shutdown_mode how)
         {
             if( __is_error(::shutdown(this->sock, how)) )
             {
@@ -283,7 +283,7 @@ namespace cppsock
          *  @brief closes and invalidates the socket
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t close()
+        ::error_t close()
         {
             if( __is_error(closesocket(this->sock)) )
             {
@@ -306,7 +306,7 @@ namespace cppsock
          *  @param addr reference to a buffer where the address should be written into
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t getsockname(socketaddr &addr) const
+        ::error_t getsockname(socketaddr &addr) const
         {
             socklen_t socklen = sizeof(addr);
             if( __is_error(::getsockname(this->sock, addr.data(), &socklen) ) )
@@ -321,7 +321,7 @@ namespace cppsock
          *  @param addr reference to a buffer where the address should be written into
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t getpeername(socketaddr &addr) const
+        ::error_t getpeername(socketaddr &addr) const
         {
             socklen_t socklen = sizeof(addr);
             if( __is_error(::getpeername(this->sock, addr.data(), &socklen) ) )
@@ -360,7 +360,7 @@ namespace cppsock
          *  @param opt_len length of the option value
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t setsockopt(int optname, const void* opt_val, socklen_t opt_len)
+        ::error_t setsockopt(int optname, const void* opt_val, socklen_t opt_len)
         {
             if( __is_error(::setsockopt(this->sock, SOL_SOCKET, optname, (const char*)opt_val, opt_len) ) ) // typecast to const char* is needed because windows
             {
@@ -376,7 +376,7 @@ namespace cppsock
          *  @param opt_len length of the buffer provided in opt_val
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t getsockopt(int optname, void* opt_val, socklen_t *opt_len) const
+        ::error_t getsockopt(int optname, void* opt_val, socklen_t *opt_len) const
         {
             if ( __is_error(::getsockopt(this->sock, SOL_SOCKET, optname, (char*)opt_val, opt_len) ) ) // typecast to char* is needed because windows
             {
@@ -391,7 +391,7 @@ namespace cppsock
          *  @param newstate the new value for the keepalive option
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t set_keepalive(bool newstate)
+        ::error_t set_keepalive(bool newstate)
         {
             int val = (newstate) ? 1 : 0;
             return this->setsockopt(SO_KEEPALIVE, &val, sizeof(val));
@@ -401,11 +401,11 @@ namespace cppsock
          *  @param buf reference to a buffer where the current state should be written into
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t get_keepalive(bool &buf) const
+        ::error_t get_keepalive(bool &buf) const
         {
             socklen_t len = sizeof(buf);
             int boolbuf;
-            error_t ret = this->getsockopt(SO_KEEPALIVE, &boolbuf, &len);
+            ::error_t ret = this->getsockopt(SO_KEEPALIVE, &boolbuf, &len);
             buf = boolbuf;
             return ret;
         }
@@ -425,7 +425,7 @@ namespace cppsock
          *  @param newstate the new value for the reuseaddr option
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t set_reuseaddr(bool newstate)
+        ::error_t set_reuseaddr(bool newstate)
         {
             return this->setsockopt(SO_REUSEADDR, (newstate) ? "1" : "\0", 1);
         }
@@ -434,11 +434,11 @@ namespace cppsock
          *  @param buf rference to a buffer where the current state should be written into
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t get_reuseaddr(bool &buf) const
+        ::error_t get_reuseaddr(bool &buf) const
         {
             socklen_t len = sizeof(buf);
             int boolbuf;
-            error_t ret = this->getsockopt(SO_REUSEADDR, &boolbuf, &len);
+            ::error_t ret = this->getsockopt(SO_REUSEADDR, &boolbuf, &len);
             buf = boolbuf;
             return ret;
         }
@@ -458,10 +458,10 @@ namespace cppsock
          *  @param buf reference to a buffer where the socket type should be written into
          *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
          */
-        error_t get_socktype(socket_type &buf) const
+        ::error_t get_socktype(socket_type &buf) const
         {
             socklen_t len = sizeof(buf);
-            error_t ret = this->getsockopt(SO_TYPE, &buf, &len);
+            ::error_t ret = this->getsockopt(SO_TYPE, &buf, &len);
             return ret;
         }
         /**

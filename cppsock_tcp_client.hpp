@@ -26,12 +26,12 @@ namespace cppsock
              *          a code of smaller than zero indicates an error and errno is set to the last error
              *          a code of greater than zero indicates a warning and errno is set to the last warning
              */
-            cppsock::utility_error_t connect(const cppsock::socketaddr &addr)
+            cppsock::error_t connect(const cppsock::socketaddr &addr)
             {
-                cppsock::utility_error_t err = cppsock::tcp_client_connect(this->_sock, addr);
-                if(err == cppsock::utility_error_none)
+                cppsock::error_t err = cppsock::tcp_client_connect(this->_sock, addr);
+                if(err == cppsock::error_none)
                 {
-                    error_t err_sockopt = this->_sock.set_keepalive(true);
+                    ::error_t err_sockopt = this->_sock.set_keepalive(true);
                     if(err_sockopt < 0)
                     {
                         return cppsock::utility_warning_keepalive;
@@ -47,12 +47,12 @@ namespace cppsock
              *          a code of smaller than zero indicates an error and errno is set to the last error
              *          a code of greater than zero indicates a warning and errno is set to the last warning
              */
-            cppsock::utility_error_t connect(const char *hostname, const char *service)
+            cppsock::error_t connect(const char *hostname, const char *service)
             {
-                cppsock::utility_error_t err = cppsock::tcp_client_connect(this->_sock, hostname, service);
-                if(err == cppsock::utility_error_none)
+                cppsock::error_t err = cppsock::tcp_client_connect(this->_sock, hostname, service);
+                if(err == cppsock::error_none)
                 {
-                    error_t err_sockopt = this->_sock.set_keepalive(true);
+                    ::error_t err_sockopt = this->_sock.set_keepalive(true);
                     if(err_sockopt < 0)
                     {
                         return cppsock::utility_warning_keepalive;
@@ -68,12 +68,12 @@ namespace cppsock
              *          a code of smaller than zero indicates an error and errno is set to the last error
              *          a code of greater than zero indicates a warning and errno is set to the last warning
              */
-            cppsock::utility_error_t connect(const char *hostname, uint16_t port)
+            cppsock::error_t connect(const char *hostname, uint16_t port)
             {
-                cppsock::utility_error_t err = cppsock::tcp_client_connect(this->_sock, hostname, port);
-                if(err == cppsock::utility_error_none)
+                cppsock::error_t err = cppsock::tcp_client_connect(this->_sock, hostname, port);
+                if(err == cppsock::error_none)
                 {
-                    error_t err_sockopt = this->_sock.set_keepalive(true);
+                    ::error_t err_sockopt = this->_sock.set_keepalive(true);
                     if(err_sockopt < 0)
                     {
                         return cppsock::utility_warning_keepalive;

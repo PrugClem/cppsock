@@ -22,11 +22,11 @@ namespace cppsock
      *  @param output reference to a output container to write the results to
      *  @return 0 if everything went right, anything else indicates an error that can pe printed with gai_strerror()
      */
-    inline error_t getaddrinfo(const char *hostname, const char* service, const addressinfo *hints, std::vector<addressinfo>& output)
+    inline ::error_t getaddrinfo(const char *hostname, const char* service, const addressinfo *hints, std::vector<addressinfo>& output)
     {
         addressinfo buf;
         addrinfo *res;
-        error_t error = ::getaddrinfo(hostname, service, (hints == nullptr) ? nullptr: hints->data(), &res);
+        ::error_t error = ::getaddrinfo(hostname, service, (hints == nullptr) ? nullptr: hints->data(), &res);
         if(error != 0)
         {
             __set_errno_from_WSA();
@@ -58,7 +58,7 @@ namespace cppsock
      *  @param strbuf buffer where the hostname should be written into
      *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
      */
-    inline error_t hostname(std::string &strbuf)
+    inline ::error_t hostname(std::string &strbuf)
     {
         char buf[256];
         if( __is_error( gethostname(buf, sizeof(buf)) ) )
@@ -90,13 +90,13 @@ namespace cppsock
      *          a code of smaller than zero indicates an error and errno is set to the last error
      *          a code of greater than zero indicates a warning and errno is set to the last warning
      */
-    inline utility_error_t tcp_listener_setup(socket &listener, const socketaddr &addr, int backlog)
+    inline cppsock::error_t tcp_listener_setup(socket &listener, const socketaddr &addr, int backlog)
     {
         if(listener.is_valid()) return cppsock::utility_error_initialised;
         if((listener.init(addr.get_family(), cppsock::socket_stream, cppsock::ip_protocol_tcp)) == 0)
             if((listener.bind(addr)) == 0)
                 if((listener.listen(backlog)) == 0)
-                    return cppsock::utility_error_none;
+                    return cppsock::error_none;
         if(listener.is_valid()) listener.close(); // close socket is it was open
         return cppsock::utility_error_fail;
     }
@@ -110,11 +110,11 @@ namespace cppsock
      *          a code of smaller than zero indicates an error and errno is set to the last error
      *          a code of greater than zero indicates a warning and errno is set to the last warning
      */
-    inline utility_error_t tcp_listener_setup(socket &listener, const char *hostname, const char *service, int backlog)
+    inline cppsock::error_t tcp_listener_setup(socket &listener, const char *hostname, const char *service, int backlog)
     {
         std::vector<cppsock::addressinfo> res;
         addressinfo hints;
-        error_t errno_last = errno; // store errno
+        ::error_t errno_last = errno; // store errno
 
         if(listener.is_valid()) return cppsock::utility_error_initialised;
         hints.reset().set_socktype(cppsock::socket_stream).set_protocol(cppsock::ip_protocol_tcp).set_passive(true); // set hints to TCP for bind()-ing
@@ -130,10 +130,10 @@ namespace cppsock
         }
         for(addressinfo &ai : res) // go through every address
         { 
-            cppsock::utility_error_t err = cppsock::tcp_listener_setup(listener, ai, backlog);
-            if(err == cppsock::utility_error_none)
+            cppsock::error_t err = cppsock::tcp_listener_setup(listener, ai, backlog);
+            if(err == cppsock::error_none)
             {
-                return cppsock::utility_error_none;
+                return cppsock::error_none;
             }
             errno_last = errno; // store errno
             errno = 0; // reset errno in case of a fail
@@ -151,7 +151,7 @@ namespace cppsock
      *          a code of smaller than zero indicates an error and errno is set to the last error
      *          a code of greater than zero indicates a warning and errno is set to the last warning
      */
-    inline utility_error_t tcp_listener_setup(socket &listener, const char* hostname, uint16_t port, int backlog)
+    inline cppsock::error_t tcp_listener_setup(socket &listener, const char* hostname, uint16_t port, int backlog)
     {
         std::stringstream ss;
 
@@ -167,14 +167,14 @@ namespace cppsock
      *          a code of smaller than zero indicates an error and errno is set to the last error
      *          a code of greater than zero indicates a warning and errno is set to the last warning
      */
-    inline utility_error_t tcp_client_connect(socket &client, const socketaddr &addr)
+    inline cppsock::error_t tcp_client_connect(socket &client, const socketaddr &addr)
     {
         if(client.is_valid()) return cppsock::utility_error_initialised;
         if ((client.init(addr.get_family(), cppsock::socket_stream, cppsock::ip_protocol_tcp)) == 0)
         {
             if ((client.connect(addr)) == 0)
             {
-                return cppsock::utility_error_none;
+                return cppsock::error_none;
             }
             else
             {
@@ -194,11 +194,11 @@ namespace cppsock
      *          a code of smaller than zero indicates an error and errno is set to the last error
      *          a code of greater than zero indicates a warning and errno is set to the last warning
      */
-    inline utility_error_t tcp_client_connect(socket &client, const char *hostname, const char *service)
+    inline cppsock::error_t tcp_client_connect(socket &client, const char *hostname, const char *service)
     {
         std::vector<cppsock::addressinfo> res;
         addressinfo hints;
-        error_t errno_last = errno;
+        ::error_t errno_last = errno;
 
         if(client.is_valid()) return cppsock::utility_error_initialised;
         hints.reset().set_socktype(cppsock::socket_stream).set_protocol(cppsock::ip_protocol_tcp); // set hints to TCP for connect()-ing
@@ -214,10 +214,10 @@ namespace cppsock
         }
         for(addressinfo &addr : res) // go through every address
         {
-            cppsock::utility_error_t err = cppsock::tcp_client_connect(client, addr);
-            if(err == cppsock::utility_error_none)
+            cppsock::error_t err = cppsock::tcp_client_connect(client, addr);
+            if(err == cppsock::error_none)
             {
-                return cppsock::utility_error_none;
+                return cppsock::error_none;
             }
             errno_last = errno; // store errno
             errno = 0; // reset errno in case of a fail
@@ -234,7 +234,7 @@ namespace cppsock
      *          a code of smaller than zero indicates an error and errno is set to the last error
      *          a code of greater than zero indicates a warning and errno is set to the last warning
      */
-    inline utility_error_t tcp_client_connect(socket &client, const char* hostname, uint16_t port)
+    inline cppsock::error_t tcp_client_connect(socket &client, const char* hostname, uint16_t port)
     {
         std::stringstream ss;
 
@@ -250,12 +250,12 @@ namespace cppsock
      *          a code of smaller than zero indicates an error and errno is set to the last error
      *          a code of greater than zero indicates a warning and errno is set to the last warning
      */
-    inline utility_error_t udp_socket_setup(socket &sock, const socketaddr &addr)
+    inline cppsock::error_t udp_socket_setup(socket &sock, const socketaddr &addr)
     {
         if(sock.is_valid()) return cppsock::utility_error_initialised;
         if((sock.init(addr.get_family(), cppsock::socket_dgram, cppsock::ip_protocol_udp)) == 0)
             if((sock.bind(addr)) == 0)
-                return cppsock::utility_error_none;
+                return cppsock::error_none;
         if(sock.is_valid()) sock.close(); // close socket is it was open
         return cppsock::utility_error_fail;
     }
@@ -268,11 +268,11 @@ namespace cppsock
      *          a code of smaller than zero indicates an error and errno is set to the last error
      *          a code of greater than zero indicates a warning and errno is set to the last warning
      */
-    inline utility_error_t udp_socket_setup(socket &sock, const char *hostname, const char *service)
+    inline cppsock::error_t udp_socket_setup(socket &sock, const char *hostname, const char *service)
     {
         std::vector<addressinfo> res;
         addressinfo hints;
-        error_t errno_last = errno;
+        ::error_t errno_last = errno;
 
         if(sock.is_valid()) return cppsock::utility_error_initialised;
         hints.reset().set_socktype(cppsock::socket_dgram).set_protocol(cppsock::ip_protocol_udp).set_passive(true);
@@ -288,10 +288,10 @@ namespace cppsock
         }
         for(addressinfo &addr : res)
         {
-            cppsock::utility_error_t err = cppsock::udp_socket_setup(sock, addr);
-            if(err == cppsock::utility_error_none)
+            cppsock::error_t err = cppsock::udp_socket_setup(sock, addr);
+            if(err == cppsock::error_none)
             {
-                return cppsock::utility_error_none;
+                return cppsock::error_none;
             }
             errno_last = errno; // store errno
             errno = 0; // reset errno in case of a fail
@@ -308,7 +308,7 @@ namespace cppsock
      *          a code of smaller than zero indicates an error and errno is set to the last error
      *          a code of greater than zero indicates a warning and errno is set to the last warning
      */
-    inline utility_error_t udp_socket_setup(socket &sock, const char *hostname, uint16_t port)
+    inline cppsock::error_t udp_socket_setup(socket &sock, const char *hostname, uint16_t port)
     {
         std::stringstream ss;
 
@@ -318,16 +318,17 @@ namespace cppsock
     }
 
     /**
-     * @brief convert an utility error code into a human-readable string
+     * @brief convert a cppsock error into a human readable string
      * @param code error code
      * @return error code as human readable string
      */
-    inline const char *utility_strerror(utility_error_t code)
+    inline const char* strerror(cppsock::error_t code)
     {
         switch (code)
         {
-        case cppsock::utility_error_none:
-            return "utility call was successful";
+        case cppsock::error_none:
+            return "no error";
+
         case cppsock::utility_warning_keepalive:
             return "failed to set keepalive socket option";
         case cppsock::utility_error_fail:
@@ -342,27 +343,14 @@ namespace cppsock
             return "none of the resolved addresses resulted in a success";
         case utility_error_connect:
             return "syscall to connect() failed";
-        default:
-            return "unknown error code provided";
-        }
-    }
-    /**
-     * @brief cnvert a swap error into a human readable string
-     * @param code error code
-     * @return error code as human readable string 
-     */
-    inline const char *swap_strerror(swap_error code)
-    {
-        switch (code)
-        {
-        case cppsock::swap_error_none:
-            return "Swap was successful";
+
         case cppsock::swap_error_socktype:
             return "provided socket has wrong socket type";
         case cppsock::swap_error_listening:
             return "provided socket for stream socket is listening";
         case cppsock::swap_error_not_listening:
             return "provided socket for listener socket is not listening";
+
         default:
             return "unknown error code provided";
         }

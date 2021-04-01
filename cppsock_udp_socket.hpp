@@ -29,7 +29,7 @@ namespace cppsock
              *          a code of smaller than zero indicates an error and errno is set to the last error
              *          a code of greater than zero indicates a warning and errno is set to the last warning
              */
-            cppsock::utility_error_t setup(const cppsock::socketaddr &addr)
+            cppsock::error_t setup(const cppsock::socketaddr &addr)
             {
                 return cppsock::udp_socket_setup(this->_sock, addr);
             }
@@ -42,7 +42,7 @@ namespace cppsock
              *          a code of smaller than zero indicates an error and errno is set to the last error
              *          a code of greater than zero indicates a warning and errno is set to the last warning
              */
-            cppsock::utility_error_t setup(const char *hostname, const char *service)
+            cppsock::error_t setup(const char *hostname, const char *service)
             {
                 return cppsock::udp_socket_setup(this->_sock, hostname, service);
             }
@@ -55,7 +55,7 @@ namespace cppsock
              *          a code of smaller than zero indicates an error and errno is set to the last error
              *          a code of greater than zero indicates a warning and errno is set to the last warning
              */
-            cppsock::utility_error_t setup(const char *hostname, uint16_t port)
+            cppsock::error_t setup(const char *hostname, uint16_t port)
             {
                 return cppsock::udp_socket_setup(this->_sock, hostname, port);
             }
@@ -98,7 +98,7 @@ namespace cppsock
              *  @return 0 if the sockets could be swapped,
              *          anything smaller than zero indicates an error, the socket are not swapped and errno may be set appropriately
              */
-            cppsock::swap_error swap(cppsock::socket &s)
+            cppsock::error_t swap(cppsock::socket &s)
             {
                 if(s.is_valid())
                 {
@@ -109,14 +109,14 @@ namespace cppsock
                 }
                 std::swap(s, this->_sock);
                 errno = 0;
-                return cppsock::swap_error_none;
+                return cppsock::error_none;
             }
 
             /**
              *  @brief closes and invalidates the socket
              *  @return 0 if everything went right, anything smaller than 0 indicates an error and errno is set appropriately
              */
-            error_t close()
+            ::error_t close()
             {
                 return this->_sock.close();
             }
